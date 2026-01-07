@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sportify_frontend/core/widgets/primary_button.dart';
+import 'package:sportify_frontend/domain/entities/user.dart';
+import 'package:sportify_frontend/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:sportify_frontend/presentation/widgets/role_card.dart';
 
 class RoleScreen extends StatefulWidget {
@@ -10,7 +13,7 @@ class RoleScreen extends StatefulWidget {
 }
 
 class _RoleScreenState extends State<RoleScreen> {
-  String? selectedRole;
+  Role? selectedRole;
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +46,8 @@ class _RoleScreenState extends State<RoleScreen> {
                 icon: Icons.sports_soccer,
                 title: "Joueur",
                 subtitle: "Connectez-vous pour jouer",
-                selected: selectedRole == "PLAYER",
-                onTap: () => setState(() => selectedRole = "PLAYER"),
+                selected: selectedRole == Role.PLAYER,
+                onTap: () => setState(() => selectedRole = Role.PLAYER),
               ),
 
               const SizedBox(height: 20),
@@ -54,8 +57,8 @@ class _RoleScreenState extends State<RoleScreen> {
                 icon: Icons.stadium,
                 title: "Responsable de terrain",
                 subtitle: "Gérez votre terrain et vos matchs",
-                selected: selectedRole == "MANAGER",
-                onTap: () => setState(() => selectedRole = "MANAGER"),
+                selected: selectedRole == Role.MANAGER,
+                onTap: () => setState(() => selectedRole = Role.MANAGER),
               ),
 
               const Spacer(),
@@ -64,11 +67,11 @@ class _RoleScreenState extends State<RoleScreen> {
                 text: "CONTINUER",
                 enabled: selectedRole != null,
                 onPressed: () {
-                  Navigator.pushNamed(
-                    context,
-                    '/login',
-                    arguments: selectedRole,
-                  );
+                  // ✅ stocker le rôle dans le ViewModel
+                  context
+                      .read<AuthViewModel>()
+                      .setSelectedRole(selectedRole!);
+                  Navigator.pushNamed(context, '/login');
                 },
               ),
 

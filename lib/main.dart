@@ -9,7 +9,7 @@ import 'package:sportify_frontend/data/repositories/auth_repository_impl.dart';
 import 'package:sportify_frontend/data/repositories/team_repository_impl.dart';
 import 'package:sportify_frontend/domain/entities/user.dart';
 import 'package:sportify_frontend/domain/usecases/auto_login_usecase.dart';
-import 'package:sportify_frontend/domain/usecases/create_team_usecase.dart';
+import 'package:sportify_frontend/domain/usecases/team_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/login_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/logout_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/register_usecase.dart';
@@ -19,6 +19,7 @@ import 'package:sportify_frontend/domain/usecases/verify_otp_usecase.dart';
 import 'package:sportify_frontend/presentation/pages/create_team_screen.dart';
 import 'package:sportify_frontend/presentation/pages/forget_password_screen.dart';
 import 'package:sportify_frontend/presentation/pages/login_screen.dart';
+import 'package:sportify_frontend/presentation/pages/my_teams_screen.dart';
 import 'package:sportify_frontend/presentation/pages/otp_screen.dart';
 import 'package:sportify_frontend/presentation/pages/player_dashboard_screen.dart';
 import 'package:sportify_frontend/presentation/pages/register_screen.dart';
@@ -64,7 +65,7 @@ void main() {
 
         ChangeNotifierProvider(
           create: (_) => TeamViewModel(
-            createTeamUseCase: CreateTeamUseCase(teamRepository),
+            teamUseCase: TeamUseCase(teamRepository),
           ),
         ),
       ],
@@ -86,14 +87,12 @@ class MyApp extends StatelessWidget {
       routes: {
         '/role': (_) => const RoleScreen(),
         '/login': (_) => const LoginScreen(),
-        '/register': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments as Role;
-          return RegisterScreen(role: args);
-        },
+        '/register': (_) => const RegisterScreen(),
         '/forgot_password': (_) => const ForgotPasswordScreen(),
         '/otp': (_) => const OTPScreen(),
         '/reset_password': (_) => const ResetPasswordScreen(),
         '/create_team': (_) => const CreateTeamScreen(),
+        '/my_teams': (_) => const MyTeamsScreen(),
         '/player_dashboard': (_) => const PlayerDashboardScreen(),
       },
     );

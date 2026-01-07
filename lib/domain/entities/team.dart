@@ -1,3 +1,5 @@
+import 'package:sportify_frontend/data/models/player_model.dart';
+
 class Team {
   final String? id;
   final String name;
@@ -5,6 +7,8 @@ class Team {
   final String color;
   final String? logoUrl;
   final String ownerId;
+  bool isActivated;
+  final List<PlayerModel>? players;
 
   Team({
     this.id,
@@ -13,5 +17,7 @@ class Team {
     required this.color,
     this.logoUrl,
     required this.ownerId,
+    this.isActivated = false,
+    this.players,
   });
 }

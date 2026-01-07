@@ -10,7 +10,6 @@ import 'package:sportify_frontend/domain/usecases/request_otp_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/reset_password_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/verify_otp_usecase.dart';
 
-
 class AuthViewModel extends ChangeNotifier {
   final RegisterUseCase registerUserUseCase;
   final LoginUseCase loginUseCase;
@@ -34,15 +33,35 @@ class AuthViewModel extends ChangeNotifier {
   User? currentUser;
   String? error;
 
-  // ---------------- Register ----------------
-  Future<void> register(
-    String firstname,
-    String lastname,
-    String email,
-    String password,
-    Role role,
+  /// 🔥 rôle choisi depuis RoleScreen
+  Role? selectedRole;
+
+  // ================= ROLE =================
+  void setSelectedRole(Role role) {
+    selectedRole = role;
+    notifyListeners();
+  }
+
+  void clearSelectedRole() {
+    selectedRole = null;
+  }
+
+  // ================= REGISTER =================
+  Future<void> register({
+    required String firstname,
+    required String lastname,
+    required String email,
+    required String password,
     File? profileImage,
-  ) async {
+  }) async {
+    final role = selectedRole;
+
+    if (role == null) {
+      error = "Rôle non sélectionné";
+      notifyListeners();
+      return;
+    }
+
     try {
       isLoading = true;
       error = null;
@@ -57,7 +76,16 @@ class AuthViewModel extends ChangeNotifier {
         profileImage: profileImage,
       );
     } catch (e) {
-      error = e.toString();
+      final message = e.toString();
+
+      if (message.contains('409') || message.contains('EMAIL_ALREADY_EXISTS')) {
+        error = "Cet email est déjà utilisé";
+      } else if (message.contains('400')) {
+        error = "Données invalides";
+      } else {
+        error = "Erreur lors de l'inscription";
+      }
+
       currentUser = null;
     } finally {
       isLoading = false;
@@ -65,14 +93,13 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  // ---------------- Login ----------------
+  // ================= LOGIN =================
   Future<void> login(String email, String password) async {
     try {
       isLoading = true;
       error = null;
       notifyListeners();
 
-      // Maintenant login renvoie directement l'utilisateur
       currentUser = await loginUseCase.call(email, password);
     } catch (e) {
       error = e.toString();
@@ -83,7 +110,7 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  // ---------------- Auto-login ----------------
+  // ================= AUTO LOGIN =================
   Future<void> tryAutoLogin() async {
     try {
       isLoading = true;
@@ -101,12 +128,14 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   Future<String?> getToken() async {
-    return await TokenStorage.getToken();
+    return TokenStorage.getAccessToken();
   }
-  // ---------------- Request OTP ----------------
+
+  // ================= OTP =================
   Future<void> requestOtp(String email) async {
     try {
       isLoading = true;
+      error = null;
       notifyListeners();
       await requestOtpUseCase.execute(email);
     } catch (e) {
@@ -117,10 +146,10 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  // ---------------- Verify OTP ----------------
   Future<void> verifyOtp(String email, String otp) async {
     try {
       isLoading = true;
+      error = null;
       notifyListeners();
       await verifyOtpUseCase.execute(email, otp);
     } catch (e) {
@@ -131,10 +160,11 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  // ---------------- Reset Password ----------------
+  // ================= RESET PASSWORD =================
   Future<void> resetPassword(String email, String newPassword) async {
     try {
       isLoading = true;
+      error = null;
       notifyListeners();
       await resetPasswordUseCase.execute(email, newPassword);
       currentUser = null;
@@ -146,14 +176,15 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  // ---------------- Logout ----------------
+  // ================= LOGOUT =================
   Future<void> logout() async {
     currentUser = null;
-    await logoutUseCase
-    .call();
+    clearSelectedRole();
+    await logoutUseCase.call();
     notifyListeners();
   }
 
+  // ================= HELPERS =================
   bool get isPlayer => currentUser?.role == Role.PLAYER;
   bool get isManager => currentUser?.role == Role.MANAGER;
 }

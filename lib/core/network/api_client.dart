@@ -3,40 +3,32 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:sportify_frontend/core/constants/api_constants.dart';
+import 'package:sportify_frontend/core/storage/token_storage.dart';
 
 class ApiClient {
-  // POST simple JSON
-  Future<Map<String, dynamic>> post(
-    String endpoint,
-    Map<String, dynamic> body, {
-    String? token,
-  }) async {
-    final headers = {
-      "Content-Type": "application/json",
-      if (token != null) "Authorization": "Bearer $token",
-    };
+  // ----- POST simple JSON -----
+  Future<Map<String, dynamic>> post(String endpoint, Map<String, dynamic> body, {String? token}) async {
+    return _withRefresh(() async {
+      final token = await TokenStorage.getAccessToken();
+      final headers = {
+        "Content-Type": "application/json",
+        if (token != null) "Authorization": "Bearer $token",
+      };
 
-    final response = await http.post(
-      Uri.parse("${ApiConstants.baseUrl}$endpoint"),
-      headers: headers,
-      body: jsonEncode(body),
-    );
+      final response = await http.post(
+        Uri.parse("${ApiConstants.baseUrl}$endpoint"),
+        headers: headers,
+        body: jsonEncode(body),
+      );
 
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception(
-          'Erreur ${response.statusCode} : ${response.body}');
-    }
+      return _handleResponse(response);
+    });
   }
 
-  // GET
-  Future<Map<String, dynamic>> get(
-    String endpoint, {
-    String? token,
-  }) async {
+  // ----- GET -----
+  Future<Map<String, dynamic>> get(String endpoint, {String? token}) async {
     final headers = {
-      if (token != null) "Authorization": "Bearer $token",
+      if (token != null) 'Authorization': 'Bearer $token',
     };
 
     final response = await http.get(
@@ -47,64 +39,143 @@ class ApiClient {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return jsonDecode(response.body);
     } else {
-      throw Exception(
-          'Erreur ${response.statusCode} : ${response.body}');
+      throw Exception('Erreur ${response.statusCode} : ${response.body}');
     }
   }
 
-  // POST multipart (avec JSON + image)
+
+  // ----- GET LIST -----
+  Future<List<dynamic>> getList(String endpoint) async {
+    return _withRefresh(() async {
+      final token = await TokenStorage.getAccessToken();
+      final headers = {if (token != null) 'Authorization': 'Bearer $token'};
+
+      final response = await http.get(
+        Uri.parse("${ApiConstants.baseUrl}$endpoint"),
+        headers: headers,
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return jsonDecode(response.body) as List;
+      } else {
+        throw Exception('Erreur ${response.statusCode} : ${response.body}');
+      }
+    });
+  }
+
+  // ----- PUT -----
+  Future<Map<String, dynamic>> put(String endpoint, Map<String, dynamic> body, {String? token}) async {
+    return _withRefresh(() async {
+      final accessToken = token ?? await TokenStorage.getAccessToken();
+      
+      final headers = {
+        "Content-Type": "application/json",
+        if (accessToken != null) "Authorization": "Bearer $accessToken",
+      };
+
+      final response = await http.put(
+        Uri.parse("${ApiConstants.baseUrl}$endpoint"),
+        headers: headers,
+        body: jsonEncode(body),
+      );
+
+      return _handleResponse(response);
+    });
+  }
+
+  // ----- POST MULTIPART (JSON + fichier) -----
   Future<Map<String, dynamic>> postMultipart(
     String endpoint,
     Map<String, dynamic> body, {
     File? file,
     String fileKey = 'image',
     String jsonKey = 'data',
-    String? token,
+    String? token
   }) async {
-    final uri = Uri.parse("${ApiConstants.baseUrl}$endpoint");
-    final request = http.MultipartRequest('POST', uri);
+    return _withRefresh(() async {
+      final token = await TokenStorage.getAccessToken();
+      final uri = Uri.parse("${ApiConstants.baseUrl}$endpoint");
+      final request = http.MultipartRequest('POST', uri);
 
-    // JSON
-    /*request.files.add(
-      http.MultipartFile.fromString(
-        jsonKey,
-        jsonEncode(body),
-        contentType: MediaType('application', 'json'),
-      ),
-    );*/
-
-    request.fields[jsonKey] = jsonEncode(body);
-
-    // Image
-    if (file != null) {
-      final ext = file.path.split('.').last.toLowerCase();
       request.files.add(
-        await http.MultipartFile.fromPath(
-          fileKey,
-          file.path,
-          contentType: MediaType(
-            'image',
-            ext == 'png' ? 'png' : 'jpeg',
-          ),
+        http.MultipartFile.fromString(
+          jsonKey,
+          jsonEncode(body),
+          contentType: MediaType('application', 'json'),
         ),
       );
+
+      if (file != null) {
+        final ext = file.path.split('.').last.toLowerCase();
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            fileKey,
+            file.path,
+            contentType: MediaType('image', ext == 'png' ? 'png' : 'jpeg'),
+          ),
+        );
+      }
+
+      if (token != null) {
+        request.headers['Authorization'] = 'Bearer $token';
+      }
+
+      final response = await request.send();
+      final respStr = await response.stream.bytesToString();
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return jsonDecode(respStr);
+      } else {
+        throw Exception('Erreur ${response.statusCode} : $respStr');
+      }
+    });
+  }
+
+  // ----- PRIVATE HELPERS -----
+
+  // Wrapper pour gérer le refresh token automatiquement
+  Future<T> _withRefresh<T>(Future<T> Function() requestFunc) async {
+    try {
+      return await requestFunc();
+    } catch (e) {
+      if (e.toString().contains('403')) {
+        final refreshed = await _refreshToken();
+        if (refreshed) {
+          return await requestFunc(); // retry après refresh
+        }
+      }
+      rethrow;
+    }
+  }
+
+  // Refresh token
+  Future<bool> _refreshToken() async {
+    final refreshToken = await TokenStorage.getRefreshToken();
+    if (refreshToken == null) return false;
+
+    final response = await http.post(
+      Uri.parse("${ApiConstants.baseUrl}/auth/refresh-token"),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'refreshToken': refreshToken}),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      await TokenStorage.saveTokens(data['accessToken'], data['refreshToken']);
+      return true;
     }
 
-    // Token
-    if (token != null) {
-      request.headers['Authorization'] = 'Bearer $token';
-    }
+    return false;
+  }
 
-    final response = await request.send();
-    final respStr = await response.stream.bytesToString();
-
+  // Parse la réponse JSON
+  Map<String, dynamic> _handleResponse(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      return jsonDecode(respStr);
+      return jsonDecode(response.body);
     } else if (response.statusCode == 403) {
-      throw Exception(
-          '403 Forbidden : Vérifie le token ou les permissions de l’utilisateur');
+      throw Exception('403 Forbidden : token expiré ou permissions insuffisantes');
     } else {
-      throw Exception('Erreur ${response.statusCode} : $respStr');
+      throw Exception('Erreur ${response.statusCode} : ${response.body}');
     }
-    }
+  }
 }

@@ -20,25 +20,35 @@ class AuthRemoteDataSource {
     );
 
     print('⬅️ Réponse backend: $res');
+
+    // Sauvegarde des tokens si fournis
+    if (res.containsKey('accessToken') && res.containsKey('refreshToken')) {
+      await TokenStorage.saveTokens(res['accessToken'], res['refreshToken']);
+    }
+
     return User.fromJson(res['user']);
   }
 
   // ---------------- Login ----------------
   Future<User> login(String email, String password) async {
     print('➡️ Login request: $email');
+
     final res = await client.post(
       '/auth/login',
       {'email': email, 'password': password},
     );
 
-    final token = res['token'];
-    print('⬅️ Token reçu: $token');
+    print('⬅️ Réponse backend: $res');
 
-    // Sauvegarder le token pour l'auto-login
-    await TokenStorage.saveToken(token);
+    // Sauvegarder les tokens (access + refresh)
+    final accessToken = res['accessToken'] ?? res['token'];
+    final refreshToken = res['refreshToken'];
+    if (accessToken != null && refreshToken != null) {
+      await TokenStorage.saveTokens(accessToken, refreshToken);
+    }
 
-    // Récupérer les infos utilisateur
-    return autoLogin(token);
+    // Récupérer les infos utilisateur via auto-login
+    return autoLogin(accessToken!);
   }
 
   // ---------------- Auto-login ----------------
@@ -51,12 +61,20 @@ class AuthRemoteDataSource {
   }
 
   Future<User?> tryAutoLogin() async {
-    final token = await TokenStorage.getToken();
+    final token = await TokenStorage.getAccessToken();
     if (token == null) return null;
 
     try {
       return await autoLogin(token);
     } catch (e) {
+      // Si token expiré, essayer refresh automatique
+      final refreshed = await _refreshToken();
+      if (refreshed) {
+        final newToken = await TokenStorage.getAccessToken();
+        if (newToken != null) return await autoLogin(newToken);
+      }
+
+      // Si tout échoue, clear
       await TokenStorage.clear();
       return null;
     }
@@ -81,5 +99,27 @@ class AuthRemoteDataSource {
   Future<void> resetPassword(String email, String newPassword) async {
     final uri = '/auth/forgot-password/reset?email=$email&newPassword=$newPassword';
     await client.post(uri, {});
+  }
+
+  // ---------------- PRIVATE ----------------
+  // Refresh token automatique
+  Future<bool> _refreshToken() async {
+    final refreshToken = await TokenStorage.getRefreshToken();
+    if (refreshToken == null) return false;
+
+    try {
+      final res = await client.post(
+        '/auth/refresh-token',
+        {'refreshToken': refreshToken},
+      );
+
+      if (res.containsKey('accessToken') && res.containsKey('refreshToken')) {
+        await TokenStorage.saveTokens(res['accessToken'], res['refreshToken']);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
   }
 }

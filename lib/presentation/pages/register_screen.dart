@@ -8,8 +8,7 @@ import 'package:sportify_frontend/presentation/widgets/profile_photo_picker.dart
 
 
 class RegisterScreen extends StatefulWidget {
-  final Role role;
-  const RegisterScreen({super.key, required this.role});
+  const RegisterScreen({super.key});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -38,14 +37,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     final authVM = context.read<AuthViewModel>();
 
+    if (authVM.selectedRole == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Veuillez choisir un rôle")),
+      );
+      return;
+    }
+
     try {
       await authVM.register(
-        firstNameController.text,
-        lastNameController.text,
-        emailController.text,
-        passwordController.text,
-        widget.role, // rôle déjà transmis
-        selectedProfileImage, // photo de profil optionnelle
+        firstname: firstNameController.text,
+        lastname: lastNameController.text,
+        email: emailController.text,
+        password: passwordController.text,
+        profileImage: selectedProfileImage,
       );
 
       if (authVM.error != null) {

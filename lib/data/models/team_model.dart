@@ -1,3 +1,4 @@
+import 'package:sportify_frontend/data/models/player_model.dart';
 import 'package:sportify_frontend/domain/entities/team.dart';
 
 class TeamModel extends Team {
@@ -8,26 +9,59 @@ class TeamModel extends Team {
     required super.color,
     super.logoUrl,
     required super.ownerId,
+    super.isActivated = false,
+    super.players,
   });
 
   factory TeamModel.fromJson(Map<String, dynamic> json) {
     return TeamModel(
-      id: json['id'],
-      name: json['name'],
+      id: (json['_id'] ?? json['id'] ?? '').toString(),
+      name: json['name'] ?? '',
       city: json['city'],
-      color: json['color'],
+      color: json['color'] ?? '#FFFFFF',
       logoUrl: json['logoUrl'],
-      ownerId: json['ownerId'],
+      ownerId: (json['ownerId'] ?? '').toString(),
+      isActivated: json['isActivated'] ?? false, 
+      players: json['players'] != null
+          ? (json['players'] as List)
+              .map((p) => PlayerModel.fromJson(p))
+              .toList()
+          : [],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      "name": name,
-      "city": city,
-      "color": color,
-      "logoUrl": logoUrl,
-      "ownerId": ownerId,
+      'name': name,
+      'city': city,
+      'color': color,
+      'logoUrl': logoUrl,
+      'ownerId': ownerId,
+      'isActivated': isActivated,
+      'players': players?.map((p) => p.toJson()).toList(),
     };
   }
+
+  TeamModel copyWith({
+    String? id,
+    String? name,
+    String? city,
+    String? color,
+    String? logoUrl,
+    bool? isActivated,
+    String? ownerId,
+    List<PlayerModel>? players,
+  }) {
+    return TeamModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      city: city ?? this.city,
+      color: color ?? this.color,
+      logoUrl: logoUrl ?? this.logoUrl,
+      isActivated: isActivated ?? this.isActivated,
+      ownerId: ownerId ?? this.ownerId,
+      players: players ?? this.players,
+    );
+  }
 }
+
