@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sportify_frontend/core/widgets/custom_text_field.dart';
-import 'package:sportify_frontend/domain/entities/user.dart';
 import 'package:sportify_frontend/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:sportify_frontend/presentation/widgets/profile_photo_picker.dart';
 

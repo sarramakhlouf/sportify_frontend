@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:sportify_frontend/data/models/player_model.dart';
 import 'package:sportify_frontend/data/models/team_model.dart';
 import 'package:sportify_frontend/domain/entities/team.dart';
 import 'package:sportify_frontend/domain/usecases/team_usecase.dart';

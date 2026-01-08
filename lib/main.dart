@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sportify_frontend/core/network/api_client.dart';
 import 'package:sportify_frontend/data/datasources/auth_remote_data_source.dart';
+import 'package:sportify_frontend/data/datasources/invitation_remote_data_source.dart';
 import 'package:sportify_frontend/data/datasources/team_remote_data_source.dart';
 import 'package:sportify_frontend/data/repositories/auth_repository_impl.dart';
+import 'package:sportify_frontend/data/repositories/invitation_repository_impl.dart';
 import 'package:sportify_frontend/data/repositories/team_repository_impl.dart';
-import 'package:sportify_frontend/domain/entities/user.dart';
 import 'package:sportify_frontend/domain/usecases/auto_login_usecase.dart';
+import 'package:sportify_frontend/domain/usecases/invite_player_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/team_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/login_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/logout_usecase.dart';
@@ -27,6 +29,7 @@ import 'package:sportify_frontend/presentation/pages/reset_password_screen.dart'
 import 'package:sportify_frontend/presentation/pages/role_screen.dart';
 import 'package:sportify_frontend/presentation/pages/splash_screen.dart';
 import 'package:sportify_frontend/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:sportify_frontend/presentation/viewmodels/invitation_viewmodel.dart';
 import 'package:sportify_frontend/presentation/viewmodels/team_viewmodel.dart';
 
 
@@ -48,6 +51,9 @@ void main() {
   final teamRemoteDS = TeamRemoteDataSource(apiClient);
   final teamRepository = TeamRepositoryImpl(teamRemoteDS);
 
+   final invitationRemoteDS = InvitationRemoteDataSource(apiClient);
+  final invitationRepository = InvitationRepositoryImpl(invitationRemoteDS);
+
   runApp(
     MultiProvider(
       providers: [
@@ -68,6 +74,13 @@ void main() {
             teamUseCase: TeamUseCase(teamRepository),
           ),
         ),
+        
+        ChangeNotifierProvider(
+          create: (_) => InvitationViewModel(
+            InvitePlayerUseCase(invitationRepository),
+          ),
+        ),
+
       ],
       child: const MyApp(),
     ),

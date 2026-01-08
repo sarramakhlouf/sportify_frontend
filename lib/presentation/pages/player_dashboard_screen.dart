@@ -4,6 +4,7 @@ import 'package:sportify_frontend/core/constants/assets.dart';
 import 'package:sportify_frontend/core/constants/api_constants.dart';
 import 'package:sportify_frontend/core/theme/app_colors.dart';
 import 'package:sportify_frontend/presentation/layouts/main_layout.dart';
+import 'package:sportify_frontend/presentation/pages/invite_player_sheet.dart';
 import 'package:sportify_frontend/presentation/pages/my_teams_screen.dart';
 import 'package:sportify_frontend/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:sportify_frontend/presentation/widgets/action_card.dart';
@@ -77,7 +78,7 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
                         child: ClipOval(
                           child: team?.logoUrl != null && team!.logoUrl!.isNotEmpty
                               ? Image.network(
-                                  '${ApiConstants.baseUrl}${team!.logoUrl!}',
+                                  '${ApiConstants.baseUrl}${team.logoUrl!}',
                                   width: 42,
                                   height: 42,
                                   fit: BoxFit.cover,
@@ -158,7 +159,26 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => Center(
+                            child: FractionallySizedBox(
+                              widthFactor: 0.7, // largeur du dialog (90% de l'écran)
+                              child: Material(
+                                color: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(28), // ✅ arrondi sur les 4 côtés
+                                ),
+                                child: InvitePlayerSheet(
+                                  teamId: team!.id!,
+                                  senderId: context.read<AuthViewModel>().currentUser!.id,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(
@@ -168,7 +188,10 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
                       icon: const Icon(Icons.add, size: 18, color: Colors.white),
                       label: const Text(
                         'Inviter',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],
