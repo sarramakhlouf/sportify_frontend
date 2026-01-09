@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:sportify_frontend/data/models/player_model.dart';
 import 'package:sportify_frontend/data/models/team_model.dart';
+import 'package:sportify_frontend/data/models/user_model.dart';
 import 'package:sportify_frontend/domain/entities/team.dart';
 
 abstract class TeamRepository {
@@ -11,4 +12,5 @@ abstract class TeamRepository {
   Future<TeamModel> activateTeam(String teamId, String ownerId, String token);
   Future<TeamModel> deactivateTeam(String teamId, String token);
   Future<List<PlayerModel>> getTeamPlayers(String teamId);
+  Future<UserModel> getUserById(String userId, String token);
 }

@@ -6,9 +6,10 @@ import 'package:sportify_frontend/core/constants/api_constants.dart';
 import 'package:sportify_frontend/core/storage/token_storage.dart';
 
 class ApiClient {
-  // ----- POST simple JSON -----
+
   Future<Map<String, dynamic>> post(String endpoint, Map<String, dynamic> body, {String? token}) async {
     return _withRefresh(() async {
+      
       final token = await TokenStorage.getAccessToken();
       final headers = {
         "Content-Type": "application/json",
@@ -25,7 +26,6 @@ class ApiClient {
     });
   }
 
-  // ----- GET -----
   Future<Map<String, dynamic>> get(String endpoint, {String? token}) async {
     final headers = {
       if (token != null) 'Authorization': 'Bearer $token',
@@ -43,8 +43,6 @@ class ApiClient {
     }
   }
 
-
-  // ----- GET LIST -----
   Future<List<dynamic>> getList(String endpoint) async {
     return _withRefresh(() async {
       final token = await TokenStorage.getAccessToken();
@@ -63,7 +61,6 @@ class ApiClient {
     });
   }
 
-  // ----- PUT -----
   Future<Map<String, dynamic>> put(String endpoint, Map<String, dynamic> body, {String? token}) async {
     return _withRefresh(() async {
       final accessToken = token ?? await TokenStorage.getAccessToken();
@@ -83,7 +80,6 @@ class ApiClient {
     });
   }
 
-  // ----- POST MULTIPART (JSON + fichier) -----
   Future<Map<String, dynamic>> postMultipart(
     String endpoint,
     Map<String, dynamic> body, {
@@ -131,9 +127,6 @@ class ApiClient {
     });
   }
 
-  // ----- PRIVATE HELPERS -----
-
-  // Wrapper pour gérer le refresh token automatiquement
   Future<T> _withRefresh<T>(Future<T> Function() requestFunc) async {
     try {
       return await requestFunc();
@@ -148,7 +141,6 @@ class ApiClient {
     }
   }
 
-  // Refresh token
   Future<bool> _refreshToken() async {
     final refreshToken = await TokenStorage.getRefreshToken();
     if (refreshToken == null) return false;
@@ -168,7 +160,6 @@ class ApiClient {
     return false;
   }
 
-  // Parse la réponse JSON
   Map<String, dynamic> _handleResponse(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return jsonDecode(response.body);

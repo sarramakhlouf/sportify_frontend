@@ -32,7 +32,7 @@ class _MyTeamsScreenState extends State<MyTeamsScreen> {
 
       authVM.getToken().then((token) {
         if (token != null) {
-          teamVM.fetchTeams(ownerId: ownerId).then((_) {
+          teamVM.fetchTeams(ownerId: ownerId, token: token).then((_) {
             print("Teams récupérées : ${teamVM.teams.map((t) => t.id).toList()}");
           });
         } else {
@@ -186,7 +186,7 @@ class _MyTeamsScreenState extends State<MyTeamsScreen> {
                               );
                             } else {
                               print("Activation de l'équipe ${team.id}");
-                              await teamVM.selectTeam(
+                              await teamVM.activateTeam(
                                 teamId: team.id!,
                                 ownerId: ownerId,
                                 token: token,

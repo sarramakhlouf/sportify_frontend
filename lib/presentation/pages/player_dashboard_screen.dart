@@ -24,17 +24,22 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final teamVM = context.read<TeamViewModel>();
       final authVM = context.read<AuthViewModel>();
 
       final userId = authVM.currentUser?.id;
+      final token = await authVM.getToken();
 
-      if (userId != null) {
-        teamVM.fetchTeams(ownerId: userId);
-      } 
+      if (userId != null && token != null) {
+        await teamVM.fetchTeams(
+          ownerId: userId,
+          token: token,
+        );
+      } else {
+        debugPrint("User ou token manquant");
+      }
     });
-
   }
 
   @override
@@ -42,6 +47,8 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
     return Consumer<TeamViewModel>(
       builder: (context, teamVM, child) {
         final team = teamVM.selectedTeam;
+
+        debugPrint("UI: selectedTeam=${team?.name}, players=${teamVM.players.length}");
 
         return MainLayout(
           currentIndex: 0,
@@ -151,6 +158,7 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
                 const SizedBox(height: 30),
 
                 // ================= MON ÉQUIPE =================
+                
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -164,11 +172,11 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
                           context: context,
                           builder: (context) => Center(
                             child: FractionallySizedBox(
-                              widthFactor: 0.7, // largeur du dialog (90% de l'écran)
+                              widthFactor: 0.9, 
                               child: Material(
                                 color: Colors.white,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(28), // ✅ arrondi sur les 4 côtés
+                                  borderRadius: BorderRadius.circular(28),
                                 ),
                                 child: InvitePlayerSheet(
                                   teamId: team!.id!,
@@ -200,16 +208,15 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
                 const SizedBox(height: 16),
 
                 // ================= LISTE DES JOUEURS =================
-                if (team != null && team.players != null && team.players!.isNotEmpty)
+                if (team != null && teamVM.players.isNotEmpty)
                   SizedBox(
                     height: 110,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
-                      itemCount: team.players!.length,
+                      itemCount: teamVM.players.length,
                       separatorBuilder: (_, __) => const SizedBox(width: 14),
                       itemBuilder: (context, index) {
-                        final player = team.players![index];
-
+                        final player = teamVM.players[index];
                         return Column(
                           children: [
                             Container(

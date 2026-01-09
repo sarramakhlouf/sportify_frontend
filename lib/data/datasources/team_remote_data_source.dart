@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:sportify_frontend/core/network/api_client.dart';
 import 'package:sportify_frontend/data/models/player_model.dart';
 import 'package:sportify_frontend/data/models/team_model.dart';
-import 'package:sportify_frontend/domain/entities/team.dart';
+import 'package:sportify_frontend/data/models/user_model.dart';
 
 class TeamRemoteDataSource {
   final ApiClient apiClient;
@@ -82,5 +82,18 @@ class TeamRemoteDataSource {
     final response = await apiClient.getList('/teams/$teamId/players');
     return response.map((e) => PlayerModel.fromJson(e)).toList();
   }
+
+  Future<UserModel> getUserById({
+    required String userId,
+    required String token,
+  }) async {
+    final response = await apiClient.get(
+      '/auth/users/$userId',
+      token: token,
+    );
+
+    return UserModel.fromJson(response);
+  }
+
 
 }

@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:sportify_frontend/domain/entities/Invitation.dart';
+import 'package:sportify_frontend/domain/usecases/get_pending_invitations.dart';
 import 'package:sportify_frontend/domain/usecases/invite_player_usecase.dart';
 
 class InvitationViewModel extends ChangeNotifier {
-  final InvitePlayerUseCase invitePlayerUseCase;
+  final InvitePlayerUsecase invitePlayerUseCase;
+  final GetPendingInvitationsUseCase getPendingInvitationsUseCase;
 
-  InvitationViewModel(this.invitePlayerUseCase);
+  InvitationViewModel(
+    this.invitePlayerUseCase,
+    this.getPendingInvitationsUseCase
+  );
 
   bool isLoading = false;
   String? error;
+  int pendingCount = 0; 
+  List<Invitation> pendingInvitations = [];
 
   Future<bool> invite({
     required String teamId,
@@ -25,7 +33,7 @@ class InvitationViewModel extends ChangeNotifier {
       error = null;
       notifyListeners();
 
-      await invitePlayerUseCase.execute(
+      await invitePlayerUseCase(
         teamId: teamId,
         senderId: senderId,
         playerCode: playerCode,
@@ -49,5 +57,21 @@ class InvitationViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
-}
 
+ Future<void> loadPendingInvitations(String userId) async {
+    try {
+      isLoading = true;
+      notifyListeners();
+
+      pendingInvitations =
+          await getPendingInvitationsUseCase(userId);
+
+      pendingCount = pendingInvitations.length;
+    } catch (e) {
+      error = 'Erreur lors du chargement des invitations';
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+}

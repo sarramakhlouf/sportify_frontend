@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:sportify_frontend/data/models/player_model.dart';
 import 'package:sportify_frontend/data/models/team_model.dart';
 import 'package:sportify_frontend/domain/entities/team.dart';
 import 'package:sportify_frontend/domain/usecases/team_usecase.dart';
@@ -12,10 +13,12 @@ class TeamViewModel extends ChangeNotifier {
 
   bool isLoading = false;
   String? error;
-  List<TeamModel> teams = [];
-  String? selectedTeamId;
-  TeamModel? selectedTeam; 
 
+  List<TeamModel> teams = [];
+  List<PlayerModel> players = [];
+
+  String? selectedTeamId;
+  TeamModel? selectedTeam;
 
   /// Crée une équipe et l'ajoute à la liste
   Future<void> createTeam({
@@ -32,12 +35,19 @@ class TeamViewModel extends ChangeNotifier {
 
     try {
       final TeamModel createdTeam = await teamUseCase.createTeam(
-        team: Team(name: name, city: city, color: color, ownerId: ownerId, isActivated: false),
+        team: Team(
+          name: name,
+          city: city,
+          color: color,
+          ownerId: ownerId,
+          isActivated: false,
+        ),
         image: image,
         token: token,
       );
 
       teams.add(createdTeam);
+      print("TEAM CREATED: ${createdTeam.name} (ID: ${createdTeam.id})");
     } catch (e) {
       error = e.toString();
     } finally {
@@ -49,6 +59,7 @@ class TeamViewModel extends ChangeNotifier {
   /// Récupère toutes les équipes d'un propriétaire
   Future<void> fetchTeams({
     required String ownerId,
+    required String token,
   }) async {
     isLoading = true;
     error = null;
@@ -58,22 +69,29 @@ class TeamViewModel extends ChangeNotifier {
       teams = await teamUseCase.getTeamsByOwner(ownerId);
 
       final TeamModel? active = teams.firstWhereOrNull((t) => t.isActivated);
+
+      selectedTeam = active;
       selectedTeamId = active?.id;
 
       if (active != null && active.id != null) {
-        await fetchTeamPlayers(active.id!);
+        print("ACTIVE TEAM FOUND: ${active.name} (ID: ${active.id})");
+        await fetchTeamPlayers(active.id!, token);
+      } else {
+        print("NO ACTIVE TEAM FOUND for owner $ownerId");
+        players = [];
       }
     } catch (e) {
       error = e.toString();
       teams = [];
+      players = [];
+      print("ERROR FETCH TEAMS: $error");
     } finally {
       isLoading = false;
       notifyListeners();
     }
   }
 
-  /// Sélectionne une équipe et met à jour `isActivated` côté frontend et backend
-  Future<void> selectTeam({
+  Future<void> activateTeam({
     required String teamId,
     required String ownerId,
     required String token,
@@ -85,33 +103,32 @@ class TeamViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Appel API pour activer l'équipe côté backend
       final updatedTeam = await teamUseCase.activateTeam(
         teamId: teamId,
         ownerId: ownerId,
         token: token,
       );
 
-      print("UPDATED TEAM FROM API: ${updatedTeam.toJson()}");
+      print("TEAM ACTIVATED: ${updatedTeam.name} (ID: ${updatedTeam.id})");
 
-      // Mise à jour locale : toutes désactivées sauf celle activée
       teams = teams.map((t) {
         if (t.id == teamId) return updatedTeam;
         return t.copyWith(isActivated: false);
       }).toList();
 
       selectedTeamId = teamId;
+      selectedTeam = updatedTeam;
 
-      await fetchTeamPlayers(teamId);
+      await fetchTeamPlayers(teamId, token);
     } catch (e) {
       error = e.toString();
+      print("ERROR ACTIVATE TEAM: $error");
     } finally {
       isLoading = false;
       notifyListeners();
     }
   }
 
-  /// Récupère une équipe par son ID
   Future<TeamModel?> fetchTeamById({
     required String teamId,
     required String token,
@@ -129,10 +146,9 @@ class TeamViewModel extends ChangeNotifier {
     } finally {
       isLoading = false;
       notifyListeners();
-    }  
+    }
   }
 
-  /// Désactive une équipe
   Future<void> deactivateTeam({
     required String teamId,
     required String token,
@@ -153,6 +169,8 @@ class TeamViewModel extends ChangeNotifier {
       }).toList();
 
       selectedTeamId = null;
+      selectedTeam = null;
+      players = [];
     } catch (e) {
       error = e.toString();
     } finally {
@@ -161,31 +179,35 @@ class TeamViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchTeamPlayers(String teamId) async {
+  Future<void> fetchTeamPlayers(String teamId, String token) async {
     isLoading = true;
+    error = null;
     notifyListeners();
 
     try {
-      final players = await teamUseCase.getTeamPlayers(teamId);
-      
-      final team = teams.firstWhereOrNull((t) => t.id == teamId);
+      final team = teams.firstWhere((t) => t.id == teamId);
+      print("FETCHING PLAYERS FOR TEAM: ${team.name} (ID: ${team.id})");
 
-      if (team != null) {
-        selectedTeam = team.copyWith(players: players);
-        print("Joueurs chargés pour l'équipe ${team.name}: ${players.map((p) => p.name).toList()}");
-      } else {
-        print("⚠️ Aucune équipe trouvée avec l'id $teamId");
-        selectedTeam = null;
-      }
-    } catch (e, stackTrace) {
-      error = "Erreur lors du chargement des joueurs: $e";
-      print(error);
-      print(stackTrace);
-      selectedTeam = null;
+      final ownerUser = await teamUseCase.getUserById(team.ownerId, token);
+      print("OWNER: ${ownerUser.firstname} ${ownerUser.lastname}");
+
+      final ownerPlayer = PlayerModel(
+        id: ownerUser.id,
+        name: '${ownerUser.firstname} ${ownerUser.lastname}',
+        avatarUrl: ownerUser.profileImageUrl,
+      );
+
+      final members = await teamUseCase.getTeamPlayers(teamId);
+      print("MEMBERS COUNT: ${members.length}");
+
+      players = [ownerPlayer, ...members.where((m) => m.id != ownerUser.id)];
+    } catch (e) {
+      error = e.toString();
+      players = [];
+      print("ERROR FETCH PLAYERS: $error");
     } finally {
       isLoading = false;
       notifyListeners();
     }
   }
-
 }

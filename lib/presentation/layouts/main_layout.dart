@@ -15,7 +15,7 @@ class MainLayout extends StatelessWidget {
   void _onNavTap(BuildContext context, int index) {
     switch (index) {
       case 0:
-        Navigator.pushReplacementNamed(context, '/dashboard');
+        Navigator.pushReplacementNamed(context, '/player_dashboard');
         break;
       case 1:
         Navigator.pushReplacementNamed(context, '/teams');

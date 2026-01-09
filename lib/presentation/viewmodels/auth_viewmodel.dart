@@ -32,11 +32,8 @@ class AuthViewModel extends ChangeNotifier {
   bool isLoading = false;
   User? currentUser;
   String? error;
-
-  /// 🔥 rôle choisi depuis RoleScreen
   Role? selectedRole;
 
-  // ================= ROLE =================
   void setSelectedRole(Role role) {
     selectedRole = role;
     notifyListeners();
@@ -46,7 +43,6 @@ class AuthViewModel extends ChangeNotifier {
     selectedRole = null;
   }
 
-  // ================= REGISTER =================
   Future<void> register({
     required String firstname,
     required String lastname,
@@ -93,7 +89,6 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  // ================= LOGIN =================
   Future<void> login(String email, String password) async {
     try {
       isLoading = true;
@@ -110,7 +105,6 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  // ================= AUTO LOGIN =================
   Future<void> tryAutoLogin() async {
     try {
       isLoading = true;
@@ -131,7 +125,6 @@ class AuthViewModel extends ChangeNotifier {
     return TokenStorage.getAccessToken();
   }
 
-  // ================= OTP =================
   Future<void> requestOtp(String email) async {
     try {
       isLoading = true;
@@ -160,7 +153,6 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  // ================= RESET PASSWORD =================
   Future<void> resetPassword(String email, String newPassword) async {
     try {
       isLoading = true;
@@ -176,15 +168,13 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  // ================= LOGOUT =================
   Future<void> logout() async {
     currentUser = null;
     clearSelectedRole();
     await logoutUseCase.call();
     notifyListeners();
   }
-
-  // ================= HELPERS =================
+  
   bool get isPlayer => currentUser?.role == Role.PLAYER;
   bool get isManager => currentUser?.role == Role.MANAGER;
 }

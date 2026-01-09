@@ -7,7 +7,6 @@ class AuthRemoteDataSource {
   final ApiClient client;
   AuthRemoteDataSource(this.client);
 
-  // ---------------- Register ----------------
   Future<User> register(Map<String, dynamic> body, File? profileImage) async {
     print('➡️ Envoi inscription: $body');
 
@@ -21,7 +20,6 @@ class AuthRemoteDataSource {
 
     print('⬅️ Réponse backend: $res');
 
-    // Sauvegarde des tokens si fournis
     if (res.containsKey('accessToken') && res.containsKey('refreshToken')) {
       await TokenStorage.saveTokens(res['accessToken'], res['refreshToken']);
     }
@@ -29,7 +27,6 @@ class AuthRemoteDataSource {
     return User.fromJson(res['user']);
   }
 
-  // ---------------- Login ----------------
   Future<User> login(String email, String password) async {
     print('➡️ Login request: $email');
 
@@ -40,7 +37,6 @@ class AuthRemoteDataSource {
 
     print('⬅️ Réponse backend: $res');
 
-    // Sauvegarder les tokens (access + refresh)
     final accessToken = res['accessToken'] ?? res['token'];
     final refreshToken = res['refreshToken'];
     if (accessToken != null && refreshToken != null) {
@@ -51,7 +47,6 @@ class AuthRemoteDataSource {
     return autoLogin(accessToken!);
   }
 
-  // ---------------- Auto-login ----------------
   Future<User> autoLogin(String token) async {
     final res = await client.get(
       '/auth/auto-login',
@@ -67,25 +62,34 @@ class AuthRemoteDataSource {
     try {
       return await autoLogin(token);
     } catch (e) {
-      // Si token expiré, essayer refresh automatique
       final refreshed = await _refreshToken();
       if (refreshed) {
         final newToken = await TokenStorage.getAccessToken();
         if (newToken != null) return await autoLogin(newToken);
       }
-
-      // Si tout échoue, clear
       await TokenStorage.clear();
       return null;
     }
   }
 
-  // ---------------- Logout ----------------
   Future<void> logout() async {
-    await TokenStorage.clear();
+    final accessToken = await TokenStorage.getAccessToken();
+
+    try {
+      if (accessToken != null) {
+        await client.post(
+          '/auth/logout',
+          {},
+          token: accessToken,
+        );
+      }
+    } catch (e) {
+      print('⚠️ Erreur logout backend: $e');
+    } finally {
+      await TokenStorage.clear();
+    }
   }
 
-  // ---------------- OTP / Reset ----------------
   Future<void> requestOtp(String email) async {
     final uri = '/auth/forgot-password/request-otp?email=$email';
     await client.post(uri, {});
@@ -101,8 +105,6 @@ class AuthRemoteDataSource {
     await client.post(uri, {});
   }
 
-  // ---------------- PRIVATE ----------------
-  // Refresh token automatique
   Future<bool> _refreshToken() async {
     final refreshToken = await TokenStorage.getRefreshToken();
     if (refreshToken == null) return false;

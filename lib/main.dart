@@ -5,12 +5,15 @@ import 'package:provider/provider.dart';
 import 'package:sportify_frontend/core/network/api_client.dart';
 import 'package:sportify_frontend/data/datasources/auth_remote_data_source.dart';
 import 'package:sportify_frontend/data/datasources/invitation_remote_data_source.dart';
+import 'package:sportify_frontend/data/datasources/notification_remote_data_source.dart';
 import 'package:sportify_frontend/data/datasources/team_remote_data_source.dart';
 import 'package:sportify_frontend/data/repositories/auth_repository_impl.dart';
 import 'package:sportify_frontend/data/repositories/invitation_repository_impl.dart';
+import 'package:sportify_frontend/data/repositories/notification_repository_impl.dart';
 import 'package:sportify_frontend/data/repositories/team_repository_impl.dart';
 import 'package:sportify_frontend/domain/usecases/auto_login_usecase.dart';
-import 'package:sportify_frontend/domain/usecases/invite_player_usecase.dart';
+import 'package:sportify_frontend/domain/usecases/get_pending_invitations.dart';
+import 'package:sportify_frontend/domain/usecases/get_unread_notif_count_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/team_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/login_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/logout_usecase.dart';
@@ -18,9 +21,11 @@ import 'package:sportify_frontend/domain/usecases/register_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/request_otp_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/reset_password_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/verify_otp_usecase.dart';
+import 'package:sportify_frontend/domain/usecases/invite_player_usecase.dart';
 import 'package:sportify_frontend/presentation/pages/create_team_screen.dart';
 import 'package:sportify_frontend/presentation/pages/forget_password_screen.dart';
 import 'package:sportify_frontend/presentation/pages/login_screen.dart';
+import 'package:sportify_frontend/presentation/pages/menu_screen.dart';
 import 'package:sportify_frontend/presentation/pages/my_teams_screen.dart';
 import 'package:sportify_frontend/presentation/pages/otp_screen.dart';
 import 'package:sportify_frontend/presentation/pages/player_dashboard_screen.dart';
@@ -30,6 +35,7 @@ import 'package:sportify_frontend/presentation/pages/role_screen.dart';
 import 'package:sportify_frontend/presentation/pages/splash_screen.dart';
 import 'package:sportify_frontend/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:sportify_frontend/presentation/viewmodels/invitation_viewmodel.dart';
+import 'package:sportify_frontend/presentation/viewmodels/notification_viewmodel.dart';
 import 'package:sportify_frontend/presentation/viewmodels/team_viewmodel.dart';
 
 
@@ -51,8 +57,11 @@ void main() {
   final teamRemoteDS = TeamRemoteDataSource(apiClient);
   final teamRepository = TeamRepositoryImpl(teamRemoteDS);
 
-   final invitationRemoteDS = InvitationRemoteDataSource(apiClient);
+  final invitationRemoteDS = InvitationRemoteDataSource(apiClient);
   final invitationRepository = InvitationRepositoryImpl(invitationRemoteDS);
+
+  final notificationRemoteDS = NotificationRemoteDataSource(apiClient);
+  final notificationRepository = NotificationRepositoryImpl(notificationRemoteDS);
 
   runApp(
     MultiProvider(
@@ -77,7 +86,14 @@ void main() {
         
         ChangeNotifierProvider(
           create: (_) => InvitationViewModel(
-            InvitePlayerUseCase(invitationRepository),
+            InvitePlayerUsecase(invitationRepository),
+            GetPendingInvitationsUseCase(invitationRepository),
+          ),
+        ),
+
+        ChangeNotifierProvider(
+          create: (_) => NotificationViewModel(
+            GetUnreadNotifCountUsecase(notificationRepository),  
           ),
         ),
 
@@ -107,6 +123,7 @@ class MyApp extends StatelessWidget {
         '/create_team': (_) => const CreateTeamScreen(),
         '/my_teams': (_) => const MyTeamsScreen(),
         '/player_dashboard': (_) => const PlayerDashboardScreen(),
+        '/menu': (_) => const MenuScreen(),
       },
     );
   }

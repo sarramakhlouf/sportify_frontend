@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:sportify_frontend/data/models/player_model.dart';
 import 'package:sportify_frontend/data/models/team_model.dart';
+import 'package:sportify_frontend/data/models/user_model.dart';
 import 'package:sportify_frontend/domain/entities/team.dart';
 import 'package:sportify_frontend/domain/repositories/team_repository.dart';
 
@@ -40,4 +41,9 @@ class TeamUseCase {
   Future<List<PlayerModel>> getTeamPlayers(String teamId) {
     return repository.getTeamPlayers(teamId);
   }
+
+  Future<UserModel> getUserById(String userId, String token) {
+    return repository.getUserById(userId, token);
+  }
+
 }

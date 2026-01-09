@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:sportify_frontend/data/datasources/team_remote_data_source.dart';
 import 'package:sportify_frontend/data/models/player_model.dart';
 import 'package:sportify_frontend/data/models/team_model.dart';
+import 'package:sportify_frontend/data/models/user_model.dart';
 import 'package:sportify_frontend/domain/entities/team.dart';
 import 'package:sportify_frontend/domain/repositories/team_repository.dart';
 
@@ -12,7 +13,11 @@ class TeamRepositoryImpl implements TeamRepository {
   TeamRepositoryImpl(this.remoteDataSource);
 
   @override
-  Future<TeamModel> createTeam(Team team, {File? image, required String token}) {
+  Future<TeamModel> createTeam(
+    Team team, {
+    File? image,
+    required String token,
+  }) {
     return remoteDataSource.createTeam(
       team: TeamModel(
         name: team.name,
@@ -43,7 +48,11 @@ class TeamRepositoryImpl implements TeamRepository {
 
   @override
   Future<TeamModel> activateTeam(String teamId, String ownerId, String token) {
-    return remoteDataSource.activateTeam(teamId: teamId, ownerId: ownerId, token: token);
+    return remoteDataSource.activateTeam(
+      teamId: teamId,
+      ownerId: ownerId,
+      token: token,
+    );
   }
 
   @override
@@ -51,9 +60,13 @@ class TeamRepositoryImpl implements TeamRepository {
     return remoteDataSource.deactivateTeam(teamId: teamId, token: token);
   }
 
-   @override
+  @override
   Future<List<PlayerModel>> getTeamPlayers(String teamId) {
     return remoteDataSource.getTeamPlayers(teamId: teamId);
   }
-  
+
+  @override
+  Future<UserModel> getUserById(String userId, String token) {
+    return remoteDataSource.getUserById(userId: userId, token: token);
+  }
 }

@@ -8,6 +8,7 @@ class UserModel extends User {
     required super.email,
     required super.role,
     required super.isEnabled,
+    required super.profileImageUrl,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -18,6 +19,7 @@ class UserModel extends User {
       email: json['email'],
       role: json['role'] == 'PLAYER' ? Role.PLAYER : Role.MANAGER,
       isEnabled: json['isEnabled'] ?? false,
+      profileImageUrl: json['profileImage'],
     );
   }
 }

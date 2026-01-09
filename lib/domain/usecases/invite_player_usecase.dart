@@ -1,11 +1,11 @@
 import 'package:sportify_frontend/domain/repositories/invitation_repository.dart';
 
-class InvitePlayerUseCase {
+class InvitePlayerUsecase {
   final InvitationRepository repository;
 
-  InvitePlayerUseCase(this.repository);
+  InvitePlayerUsecase(this.repository);
 
-  Future<void> execute({
+  Future<void> call({
     required String teamId,
     required String senderId,
     required String playerCode,
