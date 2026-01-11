@@ -20,6 +20,7 @@ import 'package:sportify_frontend/domain/usecases/logout_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/register_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/request_otp_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/reset_password_usecase.dart';
+import 'package:sportify_frontend/domain/usecases/update_profile_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/verify_otp_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/invite_player_usecase.dart';
 import 'package:sportify_frontend/presentation/pages/create_team_screen.dart';
@@ -75,6 +76,7 @@ void main() {
             requestOtpUseCase: RequestOtpUseCase(authRepository),
             verifyOtpUseCase: VerifyOtpUseCase(authRepository),
             resetPasswordUseCase: ResetPasswordUseCase(authRepository),
+            updateProfileUseCase: UpdateProfileUseCase(authRepository),
           ),
         ),
 

@@ -1,11 +1,18 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:sportify_frontend/core/constants/api_constants.dart';
 
 class ProfilePhotoPicker extends StatefulWidget {
+  final String? imageUrl;
   final Function(File?) onImageSelected;
+  final String baseUrl = ApiConstants.baseUrl;
 
-  const ProfilePhotoPicker({super.key, required this.onImageSelected});
+  const ProfilePhotoPicker({
+    super.key,
+    required this.onImageSelected,
+    this.imageUrl,
+  });
 
   @override
   State<ProfilePhotoPicker> createState() => _ProfilePhotoPickerState();
@@ -25,40 +32,56 @@ class _ProfilePhotoPickerState extends State<ProfilePhotoPicker> {
       setState(() {
         _selectedImage = File(image.path);
       });
-      widget.onImageSelected(_selectedImage); // 🔑 remonte l'image
+      widget.onImageSelected(_selectedImage);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    ImageProvider? imageProvider;
+
+    if (_selectedImage != null) {
+      imageProvider = FileImage(_selectedImage!);
+    } else if (widget.imageUrl != null && widget.imageUrl!.isNotEmpty) {
+      final String fullUrl = widget.imageUrl!.startsWith('http')
+          ? widget.imageUrl!
+          : "${widget.baseUrl}${widget.imageUrl}"; // <- utiliser widget.baseUrl
+
+      imageProvider = NetworkImage(fullUrl);
+    }
+
+
+    return Stack(
+      alignment: Alignment.bottomRight,
       children: [
+        CircleAvatar(
+          radius: 45,
+          backgroundColor: Colors.grey.shade200,
+          backgroundImage: imageProvider,
+          child: imageProvider == null
+              ? const Icon(Icons.person, size: 40, color: Colors.grey)
+              : null,
+        ),
+
         GestureDetector(
           onTap: _pickImage,
           child: Container(
-            width: 90,
-            height: 90,
+            width: 32,
+            height: 32,
             decoration: BoxDecoration(
+              color: const Color(0xFF22C55E),
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.green, width: 2),
-              image: _selectedImage != null
-                  ? DecorationImage(
-                      image: FileImage(_selectedImage!),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
+              border: Border.all(color: Colors.white, width: 3),
             ),
-            child: _selectedImage == null
-                ? const Icon(Icons.camera_alt, color: Colors.green, size: 26)
-                : null,
+            child: const Icon(
+              Icons.camera_alt,
+              color: Colors.white,
+              size: 16,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          "Ajouter une photo de profil (optionnel)",
-          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
         ),
       ],
     );
   }
+  
 }

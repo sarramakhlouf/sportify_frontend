@@ -8,6 +8,7 @@ import 'package:sportify_frontend/domain/usecases/logout_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/register_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/request_otp_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/reset_password_usecase.dart';
+import 'package:sportify_frontend/domain/usecases/update_profile_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/verify_otp_usecase.dart';
 
 class AuthViewModel extends ChangeNotifier {
@@ -18,6 +19,7 @@ class AuthViewModel extends ChangeNotifier {
   final RequestOtpUseCase requestOtpUseCase;
   final VerifyOtpUseCase verifyOtpUseCase;
   final ResetPasswordUseCase resetPasswordUseCase;
+  final UpdateProfileUseCase updateProfileUseCase;
 
   AuthViewModel({
     required this.registerUserUseCase,
@@ -27,6 +29,7 @@ class AuthViewModel extends ChangeNotifier {
     required this.requestOtpUseCase,
     required this.verifyOtpUseCase,
     required this.resetPasswordUseCase,
+    required this.updateProfileUseCase,
   });
 
   bool isLoading = false;
@@ -48,6 +51,7 @@ class AuthViewModel extends ChangeNotifier {
     required String lastname,
     required String email,
     required String password,
+    required String phone,
     File? profileImage,
   }) async {
     final role = selectedRole;
@@ -67,6 +71,7 @@ class AuthViewModel extends ChangeNotifier {
         firstname: firstname,
         lastname: lastname,
         email: email,
+        phone: phone,
         password: password,
         role: role,
         profileImage: profileImage,
@@ -174,7 +179,48 @@ class AuthViewModel extends ChangeNotifier {
     await logoutUseCase.call();
     notifyListeners();
   }
-  
+
+  Future<void> updateProfile({
+    required String firstname,
+    required String lastname,
+    required String email,
+    required String phone,
+    required String currentPassword,
+    String? newPassword,
+    File? image,
+  }) async {
+    try {
+      isLoading = true;
+      error = null;
+      notifyListeners();
+
+      final Map<String, dynamic> body = {
+        "firstname": firstname,
+        "lastname": lastname,
+        "email": email,
+        "phone": phone,
+        "currentPassword": currentPassword,
+      };
+
+      if (newPassword != null && newPassword.isNotEmpty) {
+        body["password"] = newPassword;
+      }
+
+      currentUser = await updateProfileUseCase.execute(
+        currentUser!.id, 
+        body, 
+        image,
+      );
+    } catch (e) {
+        if (e.toString().contains("Mot de passe actuel incorrect")) {
+          error = "Mot de passe actuel incorrect";
+        } inte
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
   bool get isPlayer => currentUser?.role == Role.PLAYER;
   bool get isManager => currentUser?.role == Role.MANAGER;
 }

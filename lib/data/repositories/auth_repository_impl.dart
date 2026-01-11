@@ -15,13 +15,11 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<User> login(String email, String password) {
-    // Retourne directement l'utilisateur après login
     return ds.login(email, password);
   }
 
   @override
   Future<User?> autoLogin() async {
-    // Essaie de récupérer l'utilisateur depuis le token sauvegardé
     return ds.tryAutoLogin();
   }
 
@@ -31,12 +29,22 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> requestOtp(String email) => ds.requestOtp(email);
+  Future<void> requestOtp(String email) {
+    return ds.requestOtp(email);
+  }
 
   @override
-  Future<void> verifyOtp(String email, String otp) => ds.verifyOtp(email, otp);
+  Future<void> verifyOtp(String email, String otp) {
+    return ds.verifyOtp(email, otp);
+  }
 
   @override
-  Future<void> resetPassword(String email, String password) =>
-      ds.resetPassword(email, password);
+  Future<void> resetPassword(String email, String password) {
+    return ds.resetPassword(email, password);
+  }
+
+  @override
+  Future<User> updateProfile( String userId, Map<String, dynamic> data, File? image) {
+    return ds.updateProfile(userId, data, image);
+  }
 }

@@ -6,7 +6,7 @@ class Player {
   
   Player({
     required this.id, 
-    required this.name, 
+    required this.name,
     this.avatarUrl,
     this.role,
   });

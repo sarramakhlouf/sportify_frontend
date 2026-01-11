@@ -10,4 +10,5 @@ abstract class AuthRepository {
   Future<void> requestOtp(String email);
   Future<void> verifyOtp(String email, String otp);
   Future<void> resetPassword(String email, String password);
+  Future<User> updateProfile( String userId, Map<String, dynamic> data, File? image,);
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sportify_frontend/data/models/menuItem_model.dart';
 import 'package:sportify_frontend/presentation/layouts/main_layout.dart';
+import 'package:sportify_frontend/presentation/pages/account_setting_screen.dart';
 import 'package:sportify_frontend/presentation/pages/player_dashboard_screen.dart';
 import 'package:sportify_frontend/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:sportify_frontend/presentation/viewmodels/invitation_viewmodel.dart';
@@ -73,7 +74,7 @@ class MenuScreen extends StatelessWidget {
         icon: Icons.settings,
         iconBg: const Color(0xFFF3F4F6),
         iconColor: Colors.grey,
-        screen: const PlayerDashboardScreen(),
+        screen: const AccountSettingsScreen(),
       ),
       MenuItemModel(
         title: "Debug Info",

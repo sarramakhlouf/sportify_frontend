@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:sportify_frontend/core/network/api_client.dart';
 import 'package:sportify_frontend/core/storage/token_storage.dart';
+import 'package:sportify_frontend/data/models/user_model.dart';
 import 'package:sportify_frontend/domain/entities/user.dart';
 
 class AuthRemoteDataSource {
@@ -24,16 +25,16 @@ class AuthRemoteDataSource {
       await TokenStorage.saveTokens(res['accessToken'], res['refreshToken']);
     }
 
-    return User.fromJson(res['user']);
+    return UserModel.fromJson(res['user']);
   }
 
   Future<User> login(String email, String password) async {
     print('➡️ Login request: $email');
 
-    final res = await client.post(
-      '/auth/login',
-      {'email': email, 'password': password},
-    );
+    final res = await client.post('/auth/login', {
+      'email': email,
+      'password': password,
+    });
 
     print('⬅️ Réponse backend: $res');
 
@@ -48,11 +49,8 @@ class AuthRemoteDataSource {
   }
 
   Future<User> autoLogin(String token) async {
-    final res = await client.get(
-      '/auth/auto-login',
-      token: token,
-    );
-    return User.fromJson(res);
+    final res = await client.get('/auth/auto-login', token: token);
+    return UserModel.fromJson(res);
   }
 
   Future<User?> tryAutoLogin() async {
@@ -77,11 +75,7 @@ class AuthRemoteDataSource {
 
     try {
       if (accessToken != null) {
-        await client.post(
-          '/auth/logout',
-          {},
-          token: accessToken,
-        );
+        await client.post('/auth/logout', {}, token: accessToken);
       }
     } catch (e) {
       print('⚠️ Erreur logout backend: $e');
@@ -101,7 +95,8 @@ class AuthRemoteDataSource {
   }
 
   Future<void> resetPassword(String email, String newPassword) async {
-    final uri = '/auth/forgot-password/reset?email=$email&newPassword=$newPassword';
+    final uri =
+        '/auth/forgot-password/reset?email=$email&newPassword=$newPassword';
     await client.post(uri, {});
   }
 
@@ -110,10 +105,9 @@ class AuthRemoteDataSource {
     if (refreshToken == null) return false;
 
     try {
-      final res = await client.post(
-        '/auth/refresh-token',
-        {'refreshToken': refreshToken},
-      );
+      final res = await client.post('/auth/refresh-token', {
+        'refreshToken': refreshToken,
+      });
 
       if (res.containsKey('accessToken') && res.containsKey('refreshToken')) {
         await TokenStorage.saveTokens(res['accessToken'], res['refreshToken']);
@@ -122,6 +116,49 @@ class AuthRemoteDataSource {
       return false;
     } catch (e) {
       return false;
+    }
+  }
+
+  Future<User> updateProfile(
+    String userId,
+    Map<String, dynamic> data,
+    File? image,
+  ) async {
+    if (!data.containsKey('currentPassword') ||
+        (data['currentPassword'] ?? '').isEmpty) {
+      throw Exception("Le mot de passe actuel est requis");
+    }
+
+    final Map<String, dynamic> body = {
+      "firstname": data['firstname'],
+      "lastname": data['lastname'],
+      "email": data['email'],
+      "phone": data['phone'],
+      "currentPassword": data['currentPassword'],
+      if (data.containsKey('password') &&
+          data['password'] != null &&
+          data['password'] != '')
+        "password": data['password'], // Nouveau mot de passe
+    };
+    print("updateProfile: $body");
+
+    try {
+      final res = await client.postMultipart(
+        '/auth/users/$userId/update-profile',
+        body,
+        file: image,
+        jsonKey: 'data',
+      );
+
+      print("Réponse backend updateProfile: $res");
+
+      if (res.containsKey('message')) {
+        throw Exception(res['message']);
+      }
+
+      return UserModel.fromJson(res);
+    } catch (e) {
+      rethrow;
     }
   }
 }

@@ -13,12 +13,14 @@ class RegisterUseCase {
     required String email,
     required String password,
     required Role role,
+    required String phone,
     File? profileImage,
   }) {
     final body = {
       'firstname': firstname,
       'lastname': lastname,
       'email': email,
+      'phone': phone,
       'password': password,
       'role': role.name,
     };
