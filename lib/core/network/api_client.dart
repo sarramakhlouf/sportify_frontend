@@ -43,10 +43,10 @@ class ApiClient {
     }
   }
 
-  Future<List<dynamic>> getList(String endpoint) async {
+  Future<List<dynamic>> getList(String endpoint,  {String? token}) async {
     return _withRefresh(() async {
-      final token = await TokenStorage.getAccessToken();
-      final headers = {if (token != null) 'Authorization': 'Bearer $token'};
+      final accessToken = token ?? await TokenStorage.getAccessToken();
+      final headers = {if (accessToken != null) 'Authorization': 'Bearer $accessToken'};
 
       final response = await http.get(
         Uri.parse("${ApiConstants.baseUrl}$endpoint"),

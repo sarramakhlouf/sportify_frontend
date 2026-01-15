@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/assets.dart';
+import '../../../../../core/constants/assets.dart';
 
 class AnimatedBall extends StatelessWidget {
   final AnimationController controller;

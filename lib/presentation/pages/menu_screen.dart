@@ -4,9 +4,10 @@ import 'package:sportify_frontend/data/models/menuItem_model.dart';
 import 'package:sportify_frontend/presentation/layouts/main_layout.dart';
 import 'package:sportify_frontend/presentation/pages/account_setting_screen.dart';
 import 'package:sportify_frontend/presentation/pages/player_dashboard_screen.dart';
-import 'package:sportify_frontend/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:sportify_frontend/presentation/pages/team_invitations_screen.dart';
 import 'package:sportify_frontend/presentation/viewmodels/invitation_viewmodel.dart';
 import 'package:sportify_frontend/presentation/viewmodels/notification_viewmodel.dart';
+import 'package:sportify_frontend/presentation/widgets/menu/menu_list.dart';
 
 class MenuScreen extends StatelessWidget {
   const MenuScreen({super.key});
@@ -36,10 +37,12 @@ class MenuScreen extends StatelessWidget {
       MenuItemModel(
         title: "Invitations d'Équipe",
         icon: Icons.group_add,
-        badge: inviteVM.pendingCount.toString(),
+        badge: inviteVM.pendingCount > 0
+            ? inviteVM.pendingCount.toString()
+            : null,
         iconBg: const Color(0xFFEFF6FF),
         iconColor: Colors.green,
-        screen: const PlayerDashboardScreen(),
+        screen: TeamInvitationsScreen(),
       ),
       MenuItemModel(
         title: "Équipes",
@@ -94,69 +97,7 @@ class MenuScreen extends StatelessWidget {
 
     return MainLayout(
       currentIndex: 3,
-      child: ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        itemCount: menuItems.length,
-        itemBuilder: (context, index) {
-          final item = menuItems[index];
-          return _menuItem(context, item);
-        },
-      ),
-    );
-  }
-
-  Widget _menuItem(BuildContext context, MenuItemModel item) {
-    return InkWell(
-      onTap: () async {
-        if (item.title == "Déconnexion") {
-          await context.read<AuthViewModel>().logout();
-          Navigator.pushNamedAndRemoveUntil(context, '/role', (_) => false);
-        } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => item.screen),
-          );
-        }
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 22,
-              backgroundColor: item.iconBg,
-              child: Icon(item.icon, color: item.iconColor),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                item.title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            if (item.badge != null)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.green,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  item.badge!,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            const Icon(Icons.chevron_right, color: Colors.grey),
-          ],
-        ),
-      ),
+      child: MenuList(menuItems: menuItems),
     );
   }
 }

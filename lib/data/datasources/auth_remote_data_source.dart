@@ -124,41 +124,36 @@ class AuthRemoteDataSource {
     Map<String, dynamic> data,
     File? image,
   ) async {
-    if (!data.containsKey('currentPassword') ||
-        (data['currentPassword'] ?? '').isEmpty) {
-      throw Exception("Le mot de passe actuel est requis");
-    }
-
     final Map<String, dynamic> body = {
       "firstname": data['firstname'],
       "lastname": data['lastname'],
       "email": data['email'],
       "phone": data['phone'],
-      "currentPassword": data['currentPassword'],
-      if (data.containsKey('password') &&
-          data['password'] != null &&
-          data['password'] != '')
-        "password": data['password'], // Nouveau mot de passe
     };
-    print("updateProfile: $body");
 
-    try {
-      final res = await client.postMultipart(
-        '/auth/users/$userId/update-profile',
-        body,
-        file: image,
-        jsonKey: 'data',
-      );
-
-      print("Réponse backend updateProfile: $res");
-
-      if (res.containsKey('message')) {
-        throw Exception(res['message']);
+    // Ajouter le mot de passe uniquement si l'utilisateur veut le changer
+    if (data.containsKey('password') &&
+        data['password'] != null &&
+        data['password'] != '') {
+      if (data['currentPassword'] == null || data['currentPassword'].isEmpty) {
+        throw Exception("Le mot de passe actuel est requis pour changer le mot de passe");
       }
-
-      return UserModel.fromJson(res);
-    } catch (e) {
-      rethrow;
+      body['password'] = data['password'];          // nouveau mot de passe
+      body['currentPassword'] = data['currentPassword']; // mot de passe actuel
     }
+
+    print("updateProfile body envoyé: $body");
+
+    final res = await client.postMultipart(
+      '/auth/users/$userId/update-profile',
+      body,
+      file: image,
+      jsonKey: 'data',
+    );
+
+    print("Réponse backend updateProfile: $res");
+
+    return UserModel.fromJson(res);
   }
+
 }

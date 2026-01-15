@@ -11,16 +11,26 @@ import 'package:sportify_frontend/data/repositories/auth_repository_impl.dart';
 import 'package:sportify_frontend/data/repositories/invitation_repository_impl.dart';
 import 'package:sportify_frontend/data/repositories/notification_repository_impl.dart';
 import 'package:sportify_frontend/data/repositories/team_repository_impl.dart';
+import 'package:sportify_frontend/domain/usecases/AcceptInvitation.dart';
+import 'package:sportify_frontend/domain/usecases/activate_team_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/auto_login_usecase.dart';
+import 'package:sportify_frontend/domain/usecases/create_team_usecase.dart';
+import 'package:sportify_frontend/domain/usecases/deactivate_teamusecase.dart';
+import 'package:sportify_frontend/domain/usecases/get_notifications_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/get_pending_invitations.dart';
+import 'package:sportify_frontend/domain/usecases/get_team_players_usecase.dart';
+import 'package:sportify_frontend/domain/usecases/get_teams_by_id_usecase.dart';
+import 'package:sportify_frontend/domain/usecases/get_teams_by_owner_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/get_unread_notif_count_usecase.dart';
-import 'package:sportify_frontend/domain/usecases/team_usecase.dart';
+import 'package:sportify_frontend/domain/usecases/get_user_by_id_usecase.dart';
+import 'package:sportify_frontend/domain/usecases/refuseInvitation.dart';
 import 'package:sportify_frontend/domain/usecases/login_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/logout_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/register_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/request_otp_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/reset_password_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/update_profile_usecase.dart';
+import 'package:sportify_frontend/domain/usecases/update_team_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/verify_otp_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/invite_player_usecase.dart';
 import 'package:sportify_frontend/presentation/pages/create_team_screen.dart';
@@ -39,8 +49,6 @@ import 'package:sportify_frontend/presentation/viewmodels/invitation_viewmodel.d
 import 'package:sportify_frontend/presentation/viewmodels/notification_viewmodel.dart';
 import 'package:sportify_frontend/presentation/viewmodels/team_viewmodel.dart';
 
-
-
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
@@ -50,6 +58,7 @@ class MyHttpOverrides extends HttpOverrides {
   }
 }
 void main() {
+  HttpOverrides.global = MyHttpOverrides();
   final apiClient = ApiClient();
 
   final authRemoteDS = AuthRemoteDataSource(apiClient);
@@ -68,7 +77,14 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => AuthViewModel(
+          create: (_) => NotificationViewModel(
+            GetNotificationsUsecase(notificationRepository),
+            GetUnreadNotifCountUsecase(notificationRepository),  
+          ),
+        ),
+        
+        ChangeNotifierProvider(
+          create: (context) => AuthViewModel(
             registerUserUseCase: RegisterUseCase(authRepository),
             loginUseCase: LoginUseCase(authRepository),
             logoutUseCase: LogoutUseCase(authRepository),
@@ -77,12 +93,20 @@ void main() {
             verifyOtpUseCase: VerifyOtpUseCase(authRepository),
             resetPasswordUseCase: ResetPasswordUseCase(authRepository),
             updateProfileUseCase: UpdateProfileUseCase(authRepository),
+            notificationViewModel: context.read<NotificationViewModel>(),
           ),
         ),
 
         ChangeNotifierProvider(
           create: (_) => TeamViewModel(
-            teamUseCase: TeamUseCase(teamRepository),
+            createTeamUseCase: CreateTeamUseCase(teamRepository),
+            getTeamPlayersUseCase: GetTeamPlayersUseCase(teamRepository), 
+            getTeamsByOwnerUseCase: GetTeamsByOwnerUseCase(teamRepository),
+            getTeamByIdUseCase: GetTeamByIdUseCase(teamRepository),
+            updateTeamUseCase: UpdateTeamUseCase(teamRepository),
+            activateTeamUseCase: ActivateTeamUseCase(teamRepository),
+            deactivateTeamUseCase: DeactivateTeamUseCase(teamRepository),
+            getUserByIdUseCase: GetUserByIdUseCase(teamRepository),
           ),
         ),
         
@@ -90,15 +114,10 @@ void main() {
           create: (_) => InvitationViewModel(
             InvitePlayerUsecase(invitationRepository),
             GetPendingInvitationsUseCase(invitationRepository),
+            AcceptInvitationUseCase(invitationRepository),
+            RefuseInvitationUseCase(invitationRepository),
           ),
         ),
-
-        ChangeNotifierProvider(
-          create: (_) => NotificationViewModel(
-            GetUnreadNotifCountUsecase(notificationRepository),  
-          ),
-        ),
-
       ],
       child: const MyApp(),
     ),
@@ -114,7 +133,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Sportify',
       theme: ThemeData(primarySwatch: Colors.green, fontFamily: 'Roboto'),
-      home: const SplashScreen(),
+      home: Consumer<AuthViewModel>(
+        builder: (context, authVM, _) => SplashScreen(authVM: authVM),
+      ),
       routes: {
         '/role': (_) => const RoleScreen(),
         '/login': (_) => const LoginScreen(),

@@ -9,6 +9,7 @@ class TeamModel extends Team {
     required super.color,
     super.logoUrl,
     required super.ownerId,
+    super.teamCode,
     super.isActivated = false,
     super.players,
   });
@@ -21,6 +22,7 @@ class TeamModel extends Team {
       color: json['color'] ?? '#FFFFFF',
       logoUrl: json['logoUrl'],
       ownerId: (json['ownerId'] ?? '').toString(),
+      teamCode: json['teamCode'],
       isActivated: json['isActivated'] ?? false, 
       players: json['players'] != null
           ? (json['players'] as List)
@@ -50,6 +52,7 @@ class TeamModel extends Team {
     String? logoUrl,
     bool? isActivated,
     String? ownerId,
+    String? teamCode,
     List<PlayerModel>? players,
   }) {
     return TeamModel(
@@ -60,6 +63,7 @@ class TeamModel extends Team {
       logoUrl: logoUrl ?? this.logoUrl,
       isActivated: isActivated ?? this.isActivated,
       ownerId: ownerId ?? this.ownerId,
+      teamCode: teamCode ?? this.teamCode,
       players: players ?? this.players,
     );
   }

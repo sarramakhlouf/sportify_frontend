@@ -1,27 +1,32 @@
-class InvitationModel {
-  final String id;
-  final String teamId;
-  final String senderId;
-  final String receiverId;
-  final String status;
-  final DateTime createdAt;
+import 'package:sportify_frontend/domain/entities/invitation.dart';
 
+class InvitationModel extends Invitation {
   InvitationModel({
-    required this.id,
-    required this.teamId,
-    required this.senderId,
-    required this.receiverId,
-    required this.status,
-    required this.createdAt,
-  });
+    required String id,
+    required String teamId,
+    required String senderId,
+    required String receiverId,
+    required String teamName,
+    required String status,
+    required DateTime createdAt,
+  }) : super(
+          id: id,
+          teamId: teamId,
+          senderId: senderId,
+          receiverId: receiverId,
+          teamName: teamName,
+          status: status,
+          createdAt: createdAt,
+        );
 
   factory InvitationModel.fromJson(Map<String, dynamic> json) {
     return InvitationModel(
-      id: json['id'] ?? json['_id'], 
-      teamId: json['teamId'],
-      senderId: json['senderId'],
-      receiverId: json['receiverId'],
-      status: json['status'],
+      id: json['id'] as String,
+      teamId: json['teamId'] as String,
+      senderId: json['senderId'] as String,
+      receiverId: json['receiverId'] as String,
+      teamName: json['teamName'] ?? '', 
+      status: json['status'] as String,
       createdAt: DateTime.parse(json['createdAt']),
     );
   }

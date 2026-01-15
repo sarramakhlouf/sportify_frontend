@@ -7,6 +7,7 @@ class Team {
   final String color;
   final String? logoUrl;
   final String ownerId;
+  final String? teamCode;
   bool isActivated;
   final List<PlayerModel>? players;
 
@@ -17,6 +18,7 @@ class Team {
     required this.color,
     this.logoUrl,
     required this.ownerId,
+    this.teamCode,
     this.isActivated = false,
     this.players,
   });

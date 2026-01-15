@@ -27,7 +27,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     setState(() {});
 
     try {
-      // Appel du ViewModel pour envoyer l'OTP
       await authVM.requestOtp(emailController.text);
 
       if (authVM.error != null) {
@@ -37,7 +36,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         return;
       }
 
-      // Naviguer vers OTP screen
       Navigator.pushNamed(context, '/otp', arguments: emailController.text);
     } catch (e) {
       ScaffoldMessenger.of(
@@ -64,7 +62,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // HEADER
             Stack(
               children: [
                 Image.asset(
@@ -95,7 +92,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             ),
             const SizedBox(height: 40),
 
-            // FORM
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
@@ -115,7 +111,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   const SizedBox(height: 20),
                   TextButton(
                     onPressed: () {
-                      Navigator.pop(context); // retour au login
+                      Navigator.pop(context); 
                     },
                     child: const Text(
                       "Annuler",

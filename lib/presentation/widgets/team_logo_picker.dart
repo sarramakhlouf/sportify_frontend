@@ -25,7 +25,7 @@ class _TeamLogoPickerState extends State<TeamLogoPicker> {
       setState(() {
         _selectedImage = File(image.path);
       });
-      widget.onImageSelected(_selectedImage); // 🔑 remonte l'image
+      widget.onImageSelected(_selectedImage);
     }
   }
 
@@ -34,7 +34,7 @@ class _TeamLogoPickerState extends State<TeamLogoPicker> {
     return GestureDetector(
       onTap: _pickImage,
       child: Container(
-        height: 180, // ✅ plus grand espace
+        height: 180, 
         width: double.infinity,
         decoration: BoxDecoration(
           color: const Color(0xFFE5E7EB),

@@ -20,7 +20,28 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _login() async {
     if (emailController.text.isEmpty || passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Veuillez remplir tous les champs")),
+        SnackBar(
+          backgroundColor: Colors.white,
+          elevation: 4,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline, color: Colors.black87),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  "Veuillez remplir tous les champs",
+                  style: const TextStyle(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 2),
+        ),
       );
       return;
     }
@@ -35,7 +56,28 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (authVM.error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(authVM.error!)),
+          SnackBar(
+            backgroundColor: Colors.white,
+            elevation: 4,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.black87),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    authVM.error!,
+                    style: const TextStyle(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            duration: const Duration(seconds: 2),
+        ),
         );
         return;
       }
@@ -44,10 +86,70 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (user == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Utilisateur introuvable")),
+          SnackBar(
+            backgroundColor: Colors.white,
+            elevation: 4,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.black87),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    "Utilisateur introuvable!",
+                    style: const TextStyle(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            duration: const Duration(seconds: 2),
+          ),
         );
         return;
       }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.white,
+          elevation: 4,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.black87),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        "Bienvenue ${user.firstname}",
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis, 
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Image.asset(
+                      'assets/images/loginIcon.png',
+                      width: 20,
+                      height: 20,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
 
       if (user.role == Role.PLAYER) {
         Navigator.pushReplacementNamed(context, '/player_dashboard');
@@ -56,7 +158,28 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur connexion : $e")),
+        SnackBar(
+          backgroundColor: Colors.white,
+          elevation: 4,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline, color: Colors.black87),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  "Erreur connexion : $e",
+                  style: const TextStyle(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 2),
+        ),
       );
     }
   }

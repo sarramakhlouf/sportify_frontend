@@ -6,9 +6,10 @@ import 'package:sportify_frontend/core/theme/app_colors.dart';
 import 'package:sportify_frontend/presentation/layouts/main_layout.dart';
 import 'package:sportify_frontend/presentation/pages/invite_player_sheet.dart';
 import 'package:sportify_frontend/presentation/pages/my_teams_screen.dart';
+import 'package:sportify_frontend/presentation/pages/teams_screen.dart';
 import 'package:sportify_frontend/presentation/viewmodels/auth_viewmodel.dart';
-import 'package:sportify_frontend/presentation/widgets/action_card.dart';
-import 'package:sportify_frontend/presentation/widgets/info_card.dart';
+import 'package:sportify_frontend/presentation/widgets/player_dashboard/action_card.dart';
+import 'package:sportify_frontend/presentation/widgets/player_dashboard/info_card.dart';
 import 'package:sportify_frontend/presentation/viewmodels/team_viewmodel.dart';
 
 class PlayerDashboardScreen extends StatefulWidget {
@@ -57,7 +58,6 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ================= HEADER =================
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -66,7 +66,6 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
                       height: 36,
                       fit: BoxFit.contain,
                     ),
-                    // ===== AVATAR → OPEN MY TEAMS =====
                     GestureDetector(
                       onTap: () {
                         Navigator.of(context).push(
@@ -101,7 +100,6 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
 
                 const SizedBox(height: 24),
 
-                // ================= ACTION CARDS =================
                 Row(
                   children: [
                     Expanded(
@@ -128,20 +126,34 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
 
                 const SizedBox(height: 16),
 
-                // ================= INFO CARDS =================
                 Row(
                   children: [
                     Expanded(
-                      child: InfoCard(
-                        title: 'Mes équipes',
-                        subtitle: teamVM.teams.isEmpty ? 'Aucune équipe' : '${teamVM.teams.length} équipes',
-                        color: AppColors.primary,
-                        icon: Icons.emoji_events,
-                        iconColor: Colors.white,
-                        iconBackgroundColor: AppColors.primary.withOpacity(0.2),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(16),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const TeamsScreen(),
+                            ),
+                          );
+                        },
+                        child: InfoCard(
+                          title: 'Mes équipes',
+                          subtitle: teamVM.teams.isEmpty
+                              ? 'Aucune équipe'
+                              : '${teamVM.teams.length} équipes',
+                          color: AppColors.primary,
+                          icon: Icons.emoji_events,
+                          iconColor: Colors.white,
+                          iconBackgroundColor: AppColors.primary.withOpacity(0.2),
+                        ),
                       ),
                     ),
+
                     const SizedBox(width: 12),
+
                     Expanded(
                       child: InfoCard(
                         title: 'Dernier Match',
@@ -156,8 +168,6 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
                 ),
 
                 const SizedBox(height: 30),
-
-                // ================= MON ÉQUIPE =================
                 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -207,7 +217,6 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
 
                 const SizedBox(height: 16),
 
-                // ================= LISTE DES JOUEURS =================
                 if (team != null && teamVM.players.isNotEmpty)
                   SizedBox(
                     height: 110,
@@ -284,7 +293,6 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
 
                 const SizedBox(height: 24),
 
-                // ================= PROCHAIN MATCH =================
                 const Text(
                   'Le prochain match',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),

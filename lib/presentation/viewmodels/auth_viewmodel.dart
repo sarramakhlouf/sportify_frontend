@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:sportify_frontend/core/network/stomp_websocket_service.dart';
 import 'package:sportify_frontend/core/storage/token_storage.dart';
+import 'package:sportify_frontend/data/models/notification_model.dart';
 import 'package:sportify_frontend/domain/entities/user.dart';
 import 'package:sportify_frontend/domain/usecases/auto_login_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/login_usecase.dart';
@@ -10,8 +12,10 @@ import 'package:sportify_frontend/domain/usecases/request_otp_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/reset_password_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/update_profile_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/verify_otp_usecase.dart';
+import 'package:sportify_frontend/presentation/viewmodels/notification_viewmodel.dart';
 
 class AuthViewModel extends ChangeNotifier {
+  final StompWebSocketService _stompService = StompWebSocketService();
   final RegisterUseCase registerUserUseCase;
   final LoginUseCase loginUseCase;
   final LogoutUseCase logoutUseCase;
@@ -20,6 +24,8 @@ class AuthViewModel extends ChangeNotifier {
   final VerifyOtpUseCase verifyOtpUseCase;
   final ResetPasswordUseCase resetPasswordUseCase;
   final UpdateProfileUseCase updateProfileUseCase;
+  final NotificationViewModel notificationViewModel;
+
 
   AuthViewModel({
     required this.registerUserUseCase,
@@ -30,6 +36,7 @@ class AuthViewModel extends ChangeNotifier {
     required this.verifyOtpUseCase,
     required this.resetPasswordUseCase,
     required this.updateProfileUseCase,
+    required this.notificationViewModel,
   });
 
   bool isLoading = false;
@@ -44,6 +51,33 @@ class AuthViewModel extends ChangeNotifier {
 
   void clearSelectedRole() {
     selectedRole = null;
+  }
+
+  bool get isPlayer => currentUser?.role == Role.PLAYER;
+  bool get isManager => currentUser?.role == Role.MANAGER;
+
+  void _connectWebSocket(User user) async {
+    final token = await TokenStorage.getAccessToken();
+    if (token == null) {
+      print("❌ Aucun token trouvé pour WebSocket");
+      return;
+    }
+
+    _stompService.connect(
+      userId: user.id,
+      token: token,
+      onNotification: (data) {
+        try {
+          final notif = NotificationModel.fromJson(data);
+          // ⚡ Ajouter après le frame courant pour éviter setState pendant build
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            notificationViewModel.addNotification(notif);
+          });
+        } catch (e) {
+          print("Erreur parsing notification STOMP: $e");
+        }
+      },
+    );
   }
 
   Future<void> register({
@@ -101,6 +135,10 @@ class AuthViewModel extends ChangeNotifier {
       notifyListeners();
 
       currentUser = await loginUseCase.call(email, password);
+
+      if (currentUser != null) {
+        _connectWebSocket(currentUser!);
+      }
     } catch (e) {
       error = e.toString();
       currentUser = null;
@@ -117,6 +155,10 @@ class AuthViewModel extends ChangeNotifier {
       notifyListeners();
 
       currentUser = await autoLoginUseCase.call();
+
+      if (currentUser != null) {
+        _connectWebSocket(currentUser!); 
+      }
     } catch (e) {
       error = e.toString();
       currentUser = null;
@@ -174,6 +216,7 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+     _stompService.disconnect(); 
     currentUser = null;
     clearSelectedRole();
     await logoutUseCase.call();
@@ -185,7 +228,7 @@ class AuthViewModel extends ChangeNotifier {
     required String lastname,
     required String email,
     required String phone,
-    required String currentPassword,
+    String? currentPassword,
     String? newPassword,
     File? image,
   }) async {
@@ -206,21 +249,30 @@ class AuthViewModel extends ChangeNotifier {
         body["password"] = newPassword;
       }
 
-      currentUser = await updateProfileUseCase.execute(
-        currentUser!.id, 
-        body, 
-        image,
-      );
+      print("BODY envoyé au backend: $body");
+      print("IMAGE: $image");
+
+      try {
+        currentUser = await updateProfileUseCase.execute(
+          currentUser!.id, 
+          body, 
+          image,
+        );
+      }
+      catch (e, s) {
+        print("ERREUR BACKEND: $e");
+        print(s);
+        error = e.toString();
+      }
     } catch (e) {
         if (e.toString().contains("Mot de passe actuel incorrect")) {
           error = "Mot de passe actuel incorrect";
-        } inte
+        } else {
+          error = "Erreur lors de la mise à jour du profil";
+        }
     } finally {
       isLoading = false;
       notifyListeners();
     }
   }
-
-  bool get isPlayer => currentUser?.role == Role.PLAYER;
-  bool get isManager => currentUser?.role == Role.MANAGER;
 }

@@ -39,6 +39,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   image_picker: ^1.0.7
   dotted_border: ^2.1.0
+  web_socket_channel: ^2.4.0
+  stomp_dart_client: ^1.0.0
 
 dev_dependencies:
   flutter_test:

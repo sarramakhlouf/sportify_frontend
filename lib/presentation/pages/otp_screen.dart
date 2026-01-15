@@ -12,7 +12,6 @@ class OTPScreen extends StatefulWidget {
 }
 
 class _OTPScreenState extends State<OTPScreen> {
-  // ✅ 6 champs OTP
   final List<TextEditingController> otpControllers = List.generate(
     6,
     (_) => TextEditingController(),
@@ -44,7 +43,6 @@ class _OTPScreenState extends State<OTPScreen> {
         return;
       }
 
-      // ✅ OK → reset password
       Navigator.pushNamed(context, '/reset_password', arguments: email);
     } catch (e) {
       ScaffoldMessenger.of(
@@ -76,7 +74,6 @@ class _OTPScreenState extends State<OTPScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // HEADER
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
@@ -110,7 +107,6 @@ class _OTPScreenState extends State<OTPScreen> {
 
             const SizedBox(height: 50),
 
-            /// OTP INPUTS (6)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Row(

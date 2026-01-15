@@ -11,22 +11,34 @@ class InvitationRemoteDataSource {
     required String senderId,
     required String playerCode,
   }) async {
-    final endpoint =
-        '/invitations/invite'
-        '?teamId=$teamId'
-        '&senderId=$senderId'
-        '&playerCode=$playerCode';
+    final endpoint = '/invitations/invite';
 
-    // Backend retourne Invitation mais on n’en a pas besoin ici
+    await apiClient.post(endpoint, {
+      'teamId': teamId,
+      'senderId': senderId,
+      'playerCode': playerCode,
+    });
+  }
+
+  Future<List<InvitationModel>> getPendingInvitations(String userId, {String? token}) async {
+    final response = await apiClient.getList('/invitations/pending/$userId', token: token);
+
+    return response.map((e) => InvitationModel.fromJson(e)).toList();
+  }
+
+  Future<void> acceptInvitation({
+    required String invitationId,
+    required String userId,
+  }) async {
+    final endpoint = '/invitations/$invitationId/accept?userId=$userId';
     await apiClient.post(endpoint, {});
   }
 
-  Future<List<InvitationModel>> getPendingInvitations(String userId) async {
-    final response =
-        await apiClient.get('/api/invitations/pending/$userId');
-
-    return (response as List)
-        .map((e) => InvitationModel.fromJson(e))
-        .toList();
+  Future<void> refuseInvitation({
+    required String invitationId,
+    required String userId,
+  }) async {
+    final endpoint = '/invitations/$invitationId/reject?userId=$userId';
+    await apiClient.post(endpoint, {});
   }
 }

@@ -4,7 +4,7 @@ class ActionCard extends StatelessWidget {
   final String title;
   final Color color;
   final VoidCallback onTap;
-  final IconData? icon; // icône optionnelle
+  final IconData? icon; 
   final Color? iconColor;
 
   const ActionCard({
@@ -35,7 +35,7 @@ class ActionCard extends StatelessWidget {
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 14,
-                  fontWeight: FontWeight.w400, // thin
+                  fontWeight: FontWeight.w400, 
                   height: 1.2,
                 ),
               ),
@@ -46,7 +46,7 @@ class ActionCard extends StatelessWidget {
               child: Icon(
                 icon ?? Icons.add,
                 color: iconColor ?? Colors.white,
-                size: 24, // thin
+                size: 24,
               ),
             ),
           ],

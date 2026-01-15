@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:provider/provider.dart';
+import 'package:sportify_frontend/core/constants/api_constants.dart';
 import 'package:sportify_frontend/core/theme/app_colors.dart';
 import 'package:sportify_frontend/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:sportify_frontend/presentation/viewmodels/team_viewmodel.dart';
@@ -53,20 +54,17 @@ class _MyTeamsScreenState extends State<MyTeamsScreen> {
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          // ================= BLUR BACKGROUND =================
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
             child: Container(color: AppColors.background.withOpacity(0.6)),
           ),
 
-          // ================= CONTENT =================
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ================= HEADER =================
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -99,7 +97,6 @@ class _MyTeamsScreenState extends State<MyTeamsScreen> {
 
                   const SizedBox(height: 24),
 
-                  // ================= CREATE TEAM =================
                   GestureDetector(
                     onTap: () => Navigator.pushNamed(context, '/create_team'),
                     child: DottedBorder(
@@ -140,7 +137,6 @@ class _MyTeamsScreenState extends State<MyTeamsScreen> {
 
                   const SizedBox(height: 16),
 
-                  // ================= GRID =================
                   if (teamVM.isLoading)
                     const Center(child: CircularProgressIndicator())
                   else if (teamVM.error != null)
@@ -207,7 +203,6 @@ class _MyTeamsScreenState extends State<MyTeamsScreen> {
                             ),
                             child: Column(
                               children: [
-                                // 🔒 PLACE RÉSERVÉE POUR LE BADGE
                                 SizedBox(
                                   height: 26,
                                   child: team.isActivated
@@ -241,11 +236,16 @@ class _MyTeamsScreenState extends State<MyTeamsScreen> {
                                     borderRadius: BorderRadius.circular(18),
                                   ),
                                   child: team.logoUrl != null
-                                      ? Image.network(
-                                          "https://cinderella-unfasciated-imogene.ngrok-free.dev${team.logoUrl!}",
-                                          fit: BoxFit.contain,
-                                        )
-                                      : const Icon(Icons.sports_soccer),
+                                    ? ClipRRect(
+                                        borderRadius: BorderRadius.circular(18),
+                                        child: Image.network(
+                                          "${ApiConstants.imagesUrl}${team.logoUrl!}",
+                                          width: 36,
+                                          height: 36,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      )
+                                    : const Icon(Icons.sports_soccer),
                                 ),
 
                                 const SizedBox(height: 14),

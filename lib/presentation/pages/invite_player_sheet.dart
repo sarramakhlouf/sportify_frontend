@@ -24,7 +24,7 @@ class _InvitePlayerSheetState extends State<InvitePlayerSheet> {
   @override
   Widget build(BuildContext context) {
     return Consumer<InvitationViewModel>(
-      builder: (context, vm, _) {
+      builder: (context, inviteVM, _) {
         return SafeArea(
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
@@ -36,7 +36,6 @@ class _InvitePlayerSheetState extends State<InvitePlayerSheet> {
               mainAxisSize: MainAxisSize.min,
               children: [
 
-                // ================= HEADER =================
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -57,7 +56,6 @@ class _InvitePlayerSheetState extends State<InvitePlayerSheet> {
 
                 const SizedBox(height: 26),
 
-                // ================= ICON =================
                 Container(
                   width: 64,
                   height: 64,
@@ -74,7 +72,6 @@ class _InvitePlayerSheetState extends State<InvitePlayerSheet> {
 
                 const SizedBox(height: 18),
 
-                // ================= TEXT =================
                 const Text(
                   "Entrez le code d'invitation du joueur\npour l'ajouter à votre équipe",
                   textAlign: TextAlign.center,
@@ -109,11 +106,10 @@ class _InvitePlayerSheetState extends State<InvitePlayerSheet> {
                   ),
                 ),
 
-                // ================= ERROR =================
-                if (vm.error != null) ...[
+                if (inviteVM.error != null) ...[
                   const SizedBox(height: 8),
                   Text(
-                    vm.error!,
+                    inviteVM.error!,
                     style: const TextStyle(
                       color: Colors.red,
                       fontSize: 13,
@@ -123,12 +119,11 @@ class _InvitePlayerSheetState extends State<InvitePlayerSheet> {
 
                 const SizedBox(height: 22),
 
-                // ================= BUTTONS =================
                 Row(
                   children: [
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: vm.isLoading
+                        onPressed: inviteVM.isLoading
                             ? null
                             : () => Navigator.pop(context),
                         style: ElevatedButton.styleFrom(
@@ -153,10 +148,10 @@ class _InvitePlayerSheetState extends State<InvitePlayerSheet> {
 
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: vm.isLoading
+                        onPressed: inviteVM.isLoading
                             ? null
                             : () async {
-                                final success = await vm.invite(
+                                final success = await inviteVM.invite(
                                   teamId: widget.teamId,
                                   senderId: widget.senderId,
                                   playerCode: _codeController.text.trim(),
@@ -174,7 +169,7 @@ class _InvitePlayerSheetState extends State<InvitePlayerSheet> {
                             borderRadius: BorderRadius.circular(22),
                           ),
                         ),
-                        child: vm.isLoading
+                        child: inviteVM.isLoading
                             ? const SizedBox(
                                 height: 18,
                                 width: 18,
@@ -197,7 +192,6 @@ class _InvitePlayerSheetState extends State<InvitePlayerSheet> {
 
                 const SizedBox(height: 18),
 
-                // ================= TIP =================
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(

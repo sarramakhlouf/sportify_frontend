@@ -5,7 +5,6 @@ import 'package:sportify_frontend/core/widgets/custom_text_field.dart';
 import 'package:sportify_frontend/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:sportify_frontend/presentation/widgets/profile_photo_picker.dart';
 
-
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -19,7 +18,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
   bool isPasswordVisible = false;
+  bool isConfirmPasswordVisible = false;
   File? selectedProfileImage;
 
   void _register() async {
@@ -27,9 +28,59 @@ class _RegisterScreenState extends State<RegisterScreen> {
         lastNameController.text.isEmpty ||
         emailController.text.isEmpty ||
         phoneController.text.isEmpty ||
-        passwordController.text.isEmpty) {
+        passwordController.text.isEmpty ||
+        confirmPasswordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Veuillez remplir tous les champs")),
+        SnackBar(
+          backgroundColor: Colors.white,
+          elevation: 4,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline, color: Colors.black87),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  "Veuillez remplir tous les champs",
+                  style: const TextStyle(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    if (passwordController.text != confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.white,
+          elevation: 4,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline, color: Colors.black87),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  "Les mots de passe ne correspondent pas",
+                  style: const TextStyle(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 2),
+        ),
       );
       return;
     }
@@ -37,8 +88,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final authVM = context.read<AuthViewModel>();
 
     if (authVM.selectedRole == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Veuillez choisir un rôle")),
+      ScaffoldMessenger.of( context,).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.white,
+          elevation: 4,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline, color: Colors.black87),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  "Veuillez choisir un rôle",
+                  style: const TextStyle(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 2),
+        ),
       );
       return;
     }
@@ -55,20 +127,87 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (authVM.error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Erreur inscription : ${authVM.error}")),
+          SnackBar(
+            backgroundColor: Colors.white,
+            elevation: 4,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.black87),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    "Erreur inscription : ${authVM.error}",
+                    style: const TextStyle(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            duration: const Duration(seconds: 2),
+          ),
         );
         return;
       }
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Inscription réussie !")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.white,
+          elevation: 4,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline, color: Colors.black87),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  "Inscription réussie !",
+                  style: const TextStyle(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
 
       Navigator.pushReplacementNamed(context, '/login');
     } catch (e) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Erreur inscription : $e")));
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.white,
+          elevation: 4,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline, color: Colors.black87),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  "Erreur inscription : $e",
+                  style: const TextStyle(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
     }
   }
 
@@ -79,6 +218,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     emailController.dispose();
     phoneController.dispose();
     passwordController.dispose();
+    confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -89,7 +229,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // HEADER
             Stack(
               children: [
                 Image.asset(
@@ -118,7 +257,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ],
             ),
 
-            // FORM CARD
             Transform.translate(
               offset: const Offset(0, -60),
               child: Padding(
@@ -183,6 +321,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             });
                           },
                         ),
+                        const SizedBox(height: 12),
+                        CustomTextField(
+                          hint: "Confirmer le mot de passe",
+                          icon: Icons.lock_outline,
+                          controller: confirmPasswordController,
+                          obscure: !isConfirmPasswordVisible,
+                          onToggleVisibility: () {
+                            setState(() {
+                              isConfirmPasswordVisible = !isConfirmPasswordVisible;
+                            });
+                          },
+                        ),
                         const SizedBox(height: 8),
                         Align(
                           alignment: Alignment.centerLeft,
@@ -196,7 +346,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         const SizedBox(height: 20),
 
-                        // REGISTER BUTTON
                         Consumer<AuthViewModel>(
                           builder: (context, authVM, child) => SizedBox(
                             width: double.infinity,
