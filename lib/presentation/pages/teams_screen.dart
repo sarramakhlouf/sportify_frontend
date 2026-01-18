@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sportify_frontend/presentation/pages/my_created_teams_screen.dart';
+import 'package:sportify_frontend/presentation/pages/teams_member_screen.dart';
 import 'package:sportify_frontend/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:sportify_frontend/presentation/viewmodels/team_viewmodel.dart';
 
@@ -19,10 +20,7 @@ class TeamsScreen extends StatelessWidget {
         centerTitle: true,
         title: const Text(
           "Équipes",
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-          ),
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
         ),
       ),
       body: Padding(
@@ -34,7 +32,7 @@ class TeamsScreen extends StatelessWidget {
               iconBg: const Color(0xFFEFFAF3),
               icon: Icons.emoji_events_outlined,
               iconColor: const Color(0xFF22C55E),
-              title: "Mon équipe créée",
+              title: "Mes équipes créées",
               subtitle: "Gérer mes équipes",
               onTap: () async {
                 final authVM = context.read<AuthViewModel>();
@@ -50,10 +48,7 @@ class TeamsScreen extends StatelessWidget {
                   return;
                 }
 
-                await teamVM.fetchTeams(
-                  ownerId: user.id,
-                  token: token,
-                );
+                await teamVM.fetchTeams(ownerId: user.id, token: token);
 
                 Navigator.push(
                   context,
@@ -73,6 +68,14 @@ class TeamsScreen extends StatelessWidget {
               iconColor: const Color(0xFF3B82F6),
               title: "Équipes dont je suis membre",
               subtitle: "Voir les équipes où je joue",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const TeamsMemberScreen(),
+                  ),
+                );
+              },
             ),
 
             const SizedBox(height: 16),
@@ -130,10 +133,7 @@ class TeamsScreen extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey.shade600,
-                    ),
+                    style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
                   ),
                 ],
               ),
@@ -145,7 +145,6 @@ class TeamsScreen extends StatelessWidget {
       ),
     );
   }
-
 
   Widget _infoCard() {
     return Container(
@@ -163,10 +162,7 @@ class TeamsScreen extends StatelessWidget {
               color: const Color(0xFF3B82F6),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
-              Icons.groups_outlined,
-              color: Colors.white,
-            ),
+            child: const Icon(Icons.groups_outlined, color: Colors.white),
           ),
 
           const SizedBox(width: 12),
@@ -177,18 +173,12 @@ class TeamsScreen extends StatelessWidget {
               children: const [
                 Text(
                   "Gérez vos équipes",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
                 ),
                 SizedBox(height: 4),
                 Text(
                   "Créez votre équipe, rejoignez d'autres équipes et suivez vos adversaires pour améliorer vos performances.",
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF475569),
-                  ),
+                  style: TextStyle(fontSize: 13, color: Color(0xFF475569)),
                 ),
               ],
             ),

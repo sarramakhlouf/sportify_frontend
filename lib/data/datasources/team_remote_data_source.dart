@@ -32,7 +32,36 @@ class TeamRemoteDataSource {
     return response.map((e) => TeamModel.fromJson(e)).toList();
   }
 
-  // Récupérer une équipe par ID
+  Future<List<TeamModel>> getTeamsWhereUserIsMember({
+    required String userId,
+  }) async {
+    final response = await apiClient.getList(
+      '/teams/member/$userId',
+    );
+
+    return response.map((e) => TeamModel.fromJson(e)).toList();
+  }
+
+  Future<List<TeamModel>> getUserTeams({
+    required String userId,
+    required String token,
+  }) async {
+    final response = await apiClient.get(
+      '/teams/user/$userId',
+      token: token,
+    );
+
+    final ownedTeams = (response['ownedTeams'] as List)
+        .map((e) => TeamModel.fromJson(e))
+        .toList();
+
+    final memberTeams = (response['memberTeams'] as List)
+        .map((e) => TeamModel.fromJson(e))
+        .toList();
+
+    return [...ownedTeams, ...memberTeams];
+  }
+
   Future<TeamModel> getTeamById({
     required String teamId,
     required String token,

@@ -10,6 +10,7 @@ class Team {
   final String? teamCode;
   bool isActivated;
   final List<PlayerModel>? players;
+  final DateTime? createdAt;
 
   Team({
     this.id,
@@ -21,5 +22,7 @@ class Team {
     this.teamCode,
     this.isActivated = false,
     this.players,
+    this.createdAt,
+
   });
 }

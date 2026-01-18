@@ -10,13 +10,17 @@ import 'package:sportify_frontend/domain/usecases/deactivate_teamusecase.dart';
 import 'package:sportify_frontend/domain/usecases/get_team_players_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/get_teams_by_id_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/get_teams_by_owner_usecase.dart';
+import 'package:sportify_frontend/domain/usecases/get_teams_where_user_is_member_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/get_user_by_id_usecase.dart';
+import 'package:sportify_frontend/domain/usecases/get_user_teams_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/update_team_usecase.dart';
 
 class TeamViewModel extends ChangeNotifier {
   final CreateTeamUseCase createTeamUseCase;
   final GetTeamPlayersUseCase getTeamPlayersUseCase;
   final GetTeamsByOwnerUseCase getTeamsByOwnerUseCase;
+  final GetTeamsWhereUserIsMemberUseCase getTeamsWhereUserIsMemberUseCase;
+  final GetUserTeamsUseCase getUserTeamsUseCase;
   final GetTeamByIdUseCase getTeamByIdUseCase;
   final UpdateTeamUseCase updateTeamUseCase;
   final ActivateTeamUseCase activateTeamUseCase;
@@ -27,6 +31,8 @@ class TeamViewModel extends ChangeNotifier {
     required this.createTeamUseCase,
     required this.getTeamPlayersUseCase,
     required this.getTeamsByOwnerUseCase,
+    required this.getTeamsWhereUserIsMemberUseCase,
+    required this.getUserTeamsUseCase,
     required this.getTeamByIdUseCase,
     required this.updateTeamUseCase,
     required this.activateTeamUseCase,
@@ -37,6 +43,8 @@ class TeamViewModel extends ChangeNotifier {
   bool isLoading = false;
   String? error;
 
+  List<TeamModel> ownedTeams = [];
+  List<TeamModel> memberTeams = [];
   List<TeamModel> teams = [];
   List<PlayerModel> players = [];
   Map<String, int> teamPlayersCount = {};
@@ -88,7 +96,7 @@ class TeamViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      teams = await getTeamsByOwnerUseCase(ownerId);
+      teams = await getUserTeamsUseCase(userId: ownerId, token: token,);
 
       final TeamModel? active = teams.firstWhereOrNull((t) => t.isActivated);
 
@@ -130,6 +138,43 @@ class TeamViewModel extends ChangeNotifier {
       teams = [];
       players = [];
       print("ERROR FETCH TEAMS: $error");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchOwnedTeams(String ownerId, String token) async {
+    isLoading = true;
+    error = null;
+    notifyListeners();
+
+    try {
+      ownedTeams = await getTeamsByOwnerUseCase(ownerId);
+      print("FETCH OWNED TEAMS: ${ownedTeams.length} équipes trouvées");
+      for (var team in ownedTeams) {
+        print("Owned Team: ${team.name} (ID: ${team.id})");
+      }
+    } catch (e) {
+      error = e.toString();
+      ownedTeams = [];
+      print("ERROR FETCH OWNED TEAMS: $error");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchMemberTeams(String userId) async {
+    isLoading = true;
+    error = null;
+    notifyListeners();
+
+    try {
+      memberTeams = await getTeamsWhereUserIsMemberUseCase(userId: userId);
+    } catch (e) {
+      error = e.toString();
+      memberTeams = [];
     } finally {
       isLoading = false;
       notifyListeners();
@@ -268,4 +313,44 @@ class TeamViewModel extends ChangeNotifier {
       teamPlayersCount[teamId] = 0;
     }
   }
+
+  Future<TeamModel?> loadTeamDetails({
+    required TeamModel team,
+    required String token,
+  }) async {
+    try {
+      if (team.id == null) return null;
+
+      // Récupère le propriétaire
+      final owner = await getUserByIdUseCase(team.ownerId, token);
+
+      // Récupère tous les membres
+      final members = await getTeamPlayersUseCase(team.id!);
+
+      // Crée une copie du team avec les joueurs
+      final TeamDeatiled = team.copyWith(
+        // tu peux ajouter un champ players si TeamModel le supporte
+        players: [
+          PlayerModel(
+            id: owner.id,
+            name: '${owner.firstname} ${owner.lastname}',
+            avatarUrl: owner.profileImageUrl,
+            role: "owner",
+          ),
+          ...members.map((m) => PlayerModel(
+                id: m.id,
+                name: m.name,
+                avatarUrl: m.avatarUrl,
+                role: m.role ?? "bench",
+              )),
+        ],
+      );
+
+      return TeamDeatiled;
+    } catch (e) {
+      print("ERROR loadFullTeamDetails: $e");
+      return team; // retourne au moins l’équipe originale
+    }
+  }
+
 }

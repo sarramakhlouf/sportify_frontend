@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sportify_frontend/core/network/api_client.dart';
+import 'package:sportify_frontend/core/theme/app_theme.dart';
 import 'package:sportify_frontend/data/datasources/auth_remote_data_source.dart';
 import 'package:sportify_frontend/data/datasources/invitation_remote_data_source.dart';
 import 'package:sportify_frontend/data/datasources/notification_remote_data_source.dart';
@@ -11,7 +12,7 @@ import 'package:sportify_frontend/data/repositories/auth_repository_impl.dart';
 import 'package:sportify_frontend/data/repositories/invitation_repository_impl.dart';
 import 'package:sportify_frontend/data/repositories/notification_repository_impl.dart';
 import 'package:sportify_frontend/data/repositories/team_repository_impl.dart';
-import 'package:sportify_frontend/domain/usecases/AcceptInvitation.dart';
+import 'package:sportify_frontend/domain/usecases/accept_invitation_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/activate_team_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/auto_login_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/create_team_usecase.dart';
@@ -21,9 +22,11 @@ import 'package:sportify_frontend/domain/usecases/get_pending_invitations.dart';
 import 'package:sportify_frontend/domain/usecases/get_team_players_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/get_teams_by_id_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/get_teams_by_owner_usecase.dart';
+import 'package:sportify_frontend/domain/usecases/get_teams_where_user_is_member_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/get_unread_notif_count_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/get_user_by_id_usecase.dart';
-import 'package:sportify_frontend/domain/usecases/refuseInvitation.dart';
+import 'package:sportify_frontend/domain/usecases/get_user_teams_usecase.dart';
+import 'package:sportify_frontend/domain/usecases/refuse_invitation_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/login_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/logout_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/register_usecase.dart';
@@ -102,6 +105,8 @@ void main() {
             createTeamUseCase: CreateTeamUseCase(teamRepository),
             getTeamPlayersUseCase: GetTeamPlayersUseCase(teamRepository), 
             getTeamsByOwnerUseCase: GetTeamsByOwnerUseCase(teamRepository),
+            getTeamsWhereUserIsMemberUseCase: GetTeamsWhereUserIsMemberUseCase(teamRepository),
+            getUserTeamsUseCase: GetUserTeamsUseCase(teamRepository),
             getTeamByIdUseCase: GetTeamByIdUseCase(teamRepository),
             updateTeamUseCase: UpdateTeamUseCase(teamRepository),
             activateTeamUseCase: ActivateTeamUseCase(teamRepository),
@@ -132,7 +137,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Sportify',
-      theme: ThemeData(primarySwatch: Colors.green, fontFamily: 'Roboto'),
+      //theme: ThemeData(primarySwatch: Colors.green, fontFamily: 'Roboto'),
+      theme: AppTheme.lightTheme, 
       home: Consumer<AuthViewModel>(
         builder: (context, authVM, _) => SplashScreen(authVM: authVM),
       ),
@@ -147,6 +153,7 @@ class MyApp extends StatelessWidget {
         '/my_teams': (_) => const MyTeamsScreen(),
         '/player_dashboard': (_) => const PlayerDashboardScreen(),
         '/menu': (_) => const MenuScreen(),
+        //'/team_details': (_) => const TeamDetailsScreen(team: team),
       },
     );
   }

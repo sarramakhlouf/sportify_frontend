@@ -59,7 +59,7 @@ class AuthViewModel extends ChangeNotifier {
   void _connectWebSocket(User user) async {
     final token = await TokenStorage.getAccessToken();
     if (token == null) {
-      print("❌ Aucun token trouvé pour WebSocket");
+      print("Aucun token trouvé pour WebSocket");
       return;
     }
 
@@ -69,7 +69,6 @@ class AuthViewModel extends ChangeNotifier {
       onNotification: (data) {
         try {
           final notif = NotificationModel.fromJson(data);
-          // ⚡ Ajouter après le frame courant pour éviter setState pendant build
           WidgetsBinding.instance.addPostFrameCallback((_) {
             notificationViewModel.addNotification(notif);
           });

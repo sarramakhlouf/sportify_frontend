@@ -6,15 +6,21 @@ class AppTheme {
   static ThemeData lightTheme = ThemeData(
     primaryColor: AppColors.primary,
     scaffoldBackgroundColor: AppColors.background,
-    textTheme: const TextTheme(
-      bodyLarge: AppTextStyles.body, // anciennement bodyText1
-      bodyMedium: AppTextStyles.body, // anciennement bodyText2
+
+    fontFamily: 'Roboto',
+    
+    textTheme: TextTheme(
+      bodyLarge: AppTextStyles.body,
+      bodyMedium: AppTextStyles.body,
       titleLarge: AppTextStyles.heading,
     ),
+
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary, // anciennement "primary"
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        backgroundColor: AppColors.primary,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
       ),
     ),
   );

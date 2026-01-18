@@ -37,6 +37,16 @@ class TeamRepositoryImpl implements TeamRepository {
   }
 
   @override
+  Future<List<TeamModel>> getTeamsWhereUserIsMember({required String userId}) async {
+    return await remoteDataSource.getTeamsWhereUserIsMember(userId: userId);
+  }
+
+  @override
+  Future<List<TeamModel>> getUserTeams({required String userId, required String token,}){
+    return remoteDataSource.getUserTeams( userId: userId, token: token,);
+  }
+
+  @override
   Future<TeamModel> getTeamById(String teamId, String token) {
     return remoteDataSource.getTeamById(teamId: teamId, token: token);
   }

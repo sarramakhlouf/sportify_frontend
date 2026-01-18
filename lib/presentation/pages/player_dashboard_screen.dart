@@ -45,6 +45,7 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authVM = context.read<AuthViewModel>();
     return Consumer<TeamViewModel>(
       builder: (context, teamVM, child) {
         final team = teamVM.selectedTeam;
@@ -105,9 +106,7 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
                     Expanded(
                       child: ActionCard(
                         title: 'CRÉER\nUNE ÉQUIPE',
-                        color: Colors.black,
-                        icon: Icons.group,
-                        iconColor: Colors.white,
+                        background: const Color(0xFF0E1621),
                         onTap: () => Navigator.pushNamed(context, '/create_team'),
                       ),
                     ),
@@ -115,9 +114,7 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
                     Expanded(
                       child: ActionCard(
                         title: 'RÉSERVER\nUN TERRAIN',
-                        color: AppColors.primary,
-                        icon: Icons.sports_soccer,
-                        iconColor: Colors.white,
+                        background: const Color(0xFF1DB954),
                         onTap: () {},
                       ),
                     ),
@@ -142,12 +139,17 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
                         child: InfoCard(
                           title: 'Mes équipes',
                           subtitle: teamVM.teams.isEmpty
-                              ? 'Aucune équipe'
-                              : '${teamVM.teams.length} équipes',
-                          color: AppColors.primary,
+                              ? 'Aucune équipe créée'
+                              : '${teamVM.teams.length} équipes créées',
+                          background: const Color(0xFF1DB954),
                           icon: Icons.emoji_events,
-                          iconColor: Colors.white,
-                          iconBackgroundColor: AppColors.primary.withOpacity(0.2),
+                          badgeText: teamVM.teams.isEmpty ? null : '${teamVM.teams.length}',
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const TeamsScreen()),
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -157,11 +159,9 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
                     Expanded(
                       child: InfoCard(
                         title: 'Dernier Match',
-                        subtitle: 'Aucun vote reçu',
-                        color: Colors.purple,
-                        icon: Icons.star,
-                        iconColor: Colors.white,
-                        iconBackgroundColor: Colors.purple.withOpacity(0.2),
+                        subtitle:'Aucun vote reçu',
+                        background: const Color(0xFF8B5CF6),
+                        avatarUrl: authVM.currentUser!.profileImageUrl,
                       ),
                     ),
                   ],

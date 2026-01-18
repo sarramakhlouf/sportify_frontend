@@ -12,6 +12,7 @@ class TeamModel extends Team {
     super.teamCode,
     super.isActivated = false,
     super.players,
+    super.createdAt,
   });
 
   factory TeamModel.fromJson(Map<String, dynamic> json) {
@@ -29,6 +30,9 @@ class TeamModel extends Team {
               .map((p) => PlayerModel.fromJson(p))
               .toList()
           : [],
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : null, 
     );
   }
 
@@ -54,6 +58,8 @@ class TeamModel extends Team {
     String? ownerId,
     String? teamCode,
     List<PlayerModel>? players,
+    DateTime? createdAt,
+
   }) {
     return TeamModel(
       id: id ?? this.id,
@@ -65,6 +71,7 @@ class TeamModel extends Team {
       ownerId: ownerId ?? this.ownerId,
       teamCode: teamCode ?? this.teamCode,
       players: players ?? this.players,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 }

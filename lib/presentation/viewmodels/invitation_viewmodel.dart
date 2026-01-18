@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:sportify_frontend/core/network/stomp_websocket_service.dart';
 import 'package:sportify_frontend/core/storage/token_storage.dart';
 import 'package:sportify_frontend/domain/entities/invitation.dart';
-import 'package:sportify_frontend/domain/usecases/AcceptInvitation.dart';
+import 'package:sportify_frontend/domain/usecases/accept_invitation_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/get_pending_invitations.dart';
 import 'package:sportify_frontend/domain/usecases/invite_player_usecase.dart';
-import 'package:sportify_frontend/domain/usecases/refuseInvitation.dart';
+import 'package:sportify_frontend/domain/usecases/refuse_invitation_usecase.dart';
 
 class InvitationViewModel extends ChangeNotifier {
   final InvitePlayerUsecase invitePlayerUseCase;

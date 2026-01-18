@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sportify_frontend/presentation/pages/create_team_screen.dart';
 
 class MyTeamsAppBar extends StatelessWidget
     implements PreferredSizeWidget {
@@ -26,7 +27,12 @@ class MyTeamsAppBar extends StatelessWidget
             child: IconButton(
               icon: const Icon(Icons.add, color: Colors.white, size: 20),
               onPressed: () {
-                // TODO: navigation vers CreateTeamScreen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CreateTeamScreen(),
+                  ),
+                );
               },
             ),
           ),

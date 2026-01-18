@@ -56,14 +56,13 @@ class NotificationViewModel extends ChangeNotifier {
   }
 
   void markAsRead(NotificationModel notif) async {
-    // call backend pour marquer read
     notif.isRead = true;
     notifyListeners();
   }
 
   @override
   void dispose() {
-    _stompService.disconnect(); // ⚠️ déconnecte la bonne instance
+    _stompService.disconnect(); 
     super.dispose();
   }
 
