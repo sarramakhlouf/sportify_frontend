@@ -12,10 +12,21 @@ class TeamFormHeader extends StatelessWidget {
           'Créer une équipe',
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
-        IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.pop(context),
-        )
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            shape: BoxShape.circle,
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.close, size: 20),
+            onPressed: () => Navigator.pop(context),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(
+              minWidth: 32,
+              minHeight: 32,
+            ),
+          ),
+        ),
       ],
     );
   }

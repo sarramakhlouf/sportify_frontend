@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sportify_frontend/core/constants/assets.dart';
 import 'package:sportify_frontend/core/constants/api_constants.dart';
+import 'package:sportify_frontend/core/constants/assets.dart';
 import 'package:sportify_frontend/core/theme/app_colors.dart';
 import 'package:sportify_frontend/presentation/layouts/main_layout.dart';
 import 'package:sportify_frontend/presentation/pages/invite_player_sheet.dart';
@@ -18,7 +18,6 @@ class PlayerDashboardScreen extends StatefulWidget {
   @override
   State<PlayerDashboardScreen> createState() => _PlayerDashboardScreenState();
 }
-
 
 class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
   @override
@@ -51,6 +50,7 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
         final team = teamVM.selectedTeam;
 
         debugPrint("UI: selectedTeam=${team?.name}, players=${teamVM.players.length}");
+        debugPrint("url image: ${authVM.currentUser!.profileImageUrl}");
 
         return MainLayout(
           currentIndex: 0,
@@ -63,7 +63,7 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Image.asset(
-                      AppAssets.logo,
+                      AppAssets.logoRemovebg,
                       height: 36,
                       fit: BoxFit.contain,
                     ),
@@ -85,7 +85,7 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
                         child: ClipOval(
                           child: team?.logoUrl != null && team!.logoUrl!.isNotEmpty
                               ? Image.network(
-                                  '${ApiConstants.baseUrl}${team.logoUrl!}',
+                                  "${ApiConstants.imageUrl}${team.logoUrl!}",
                                   width: 42,
                                   height: 42,
                                   fit: BoxFit.cover,
@@ -144,31 +144,26 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
                           background: const Color(0xFF1DB954),
                           icon: Icons.emoji_events,
                           badgeText: teamVM.teams.isEmpty ? null : '${teamVM.teams.length}',
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => const TeamsScreen()),
-                            );
-                          },
                         ),
                       ),
                     ),
-
                     const SizedBox(width: 12),
-
                     Expanded(
                       child: InfoCard(
                         title: 'Dernier Match',
-                        subtitle:'Aucun vote reçu',
+                        subtitle: 'Aucun vote reçu',
                         background: const Color(0xFF8B5CF6),
-                        avatarUrl: authVM.currentUser!.profileImageUrl,
+                        avatarUrl: (authVM.currentUser?.profileImageUrl != null &&
+                                authVM.currentUser!.profileImageUrl!.isNotEmpty)
+                            ? '${authVM.currentUser!.profileImageUrl}'
+                            : null,
                       ),
                     ),
                   ],
                 ),
 
                 const SizedBox(height: 30),
-                
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -178,18 +173,29 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
                     ),
                     ElevatedButton.icon(
                       onPressed: () {
+                        if (team == null || team.id == null) {
+                          debugPrint("Il faut sélectionner une équipe");
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Veuillez sélectionner une équipe'),
+                              backgroundColor: Colors.red,
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                          return;
+                        }
                         showDialog(
                           context: context,
                           builder: (context) => Center(
                             child: FractionallySizedBox(
-                              widthFactor: 0.9, 
+                              widthFactor: 0.9,
                               child: Material(
                                 color: Colors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(28),
                                 ),
                                 child: InvitePlayerSheet(
-                                  teamId: team!.id!,
+                                  teamId: team.id!,
                                   senderId: context.read<AuthViewModel>().currentUser!.id,
                                 ),
                               ),
@@ -219,7 +225,7 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
 
                 if (team != null && teamVM.players.isNotEmpty)
                   SizedBox(
-                    height: 110,
+                    height: 120,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: teamVM.players.length,
@@ -229,40 +235,60 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
                         return Column(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(3),
+                              width: 72,
+                              height: 72,
                               decoration: BoxDecoration(
-                                shape: BoxShape.circle,
+                                color: AppColors.primary.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(18),
                                 border: Border.all(
-                                  color: AppColors.primary, // ✅ bordure verte
+                                  color: AppColors.primary,
                                   width: 2,
                                 ),
                               ),
-                              child: CircleAvatar(
-                                radius: 28,
-                                backgroundColor: Colors.grey.shade200,
-                                backgroundImage: player.avatarUrl != null &&
-                                        player.avatarUrl!.isNotEmpty
-                                    ? NetworkImage(
-                                        '${ApiConstants.baseUrl}${player.avatarUrl!}',
-                                      )
-                                    : null,
-                                child: player.avatarUrl == null ||
-                                        player.avatarUrl!.isEmpty
-                                    ? Text(
+                              child: player.avatarUrl != null && player.avatarUrl!.isNotEmpty
+                                  ? ClipRRect(
+                                      borderRadius: BorderRadius.circular(16),
+                                      child: Image.network(
+                                        "${ApiConstants.imageUrl}${player.avatarUrl!}",
+                                        width: 72,
+                                        height: 72,
+                                        fit: BoxFit.cover,
+                                        loadingBuilder: (context, child, loadingProgress) {
+                                          if (loadingProgress == null) return child;
+                                          return const Center(
+                                            child: CircularProgressIndicator(strokeWidth: 2),
+                                          );
+                                        },
+                                        errorBuilder: (context, error, stackTrace) {
+                                          print('Erreur chargement image: $error');
+                                          return Center(
+                                            child: Text(
+                                              player.name.isNotEmpty
+                                                  ? player.name[0].toUpperCase()
+                                                  : '?',
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 24,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    )
+                                  : Center(
+                                      child: Text(
                                         player.name.isNotEmpty
                                             ? player.name[0].toUpperCase()
                                             : '?',
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 18,
+                                          fontSize: 24,
                                         ),
-                                      )
-                                    : null,
-                              ),
+                                      ),
+                                    ),
                             ),
-                            const SizedBox(height: 6),
-                            SizedBox(
-                              width: 70,
+                            const SizedBox(height: 4),
+                            Flexible(
                               child: Text(
                                 player.name,
                                 textAlign: TextAlign.center,
@@ -290,30 +316,198 @@ class _PlayerDashboardScreenState extends State<PlayerDashboardScreen> {
                     style: TextStyle(color: Colors.grey),
                   ),
 
+                const SizedBox(height: 30),
 
-                const SizedBox(height: 24),
-
-                const Text(
-                  'Le prochain match',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                // Boutons Matchs planifiés / Matchs joués
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          // Action pour matchs planifiés
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: Colors.grey.shade300, width: 1.5),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: Text(
+                          'Matchs planifiés',
+                          style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Action pour matchs joués
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          elevation: 0,
+                        ),
+                        child: const Text(
+                          'Matchs joués',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12),
+
+                const SizedBox(height: 20),
+
+                // Carte de match (VS)
                 Container(
-                  height: 140,
-                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
+                    color: Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(Icons.emoji_events, size: 40, color: Colors.grey),
-                      SizedBox(height: 10),
-                      Text('Commencez votre aventure'),
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          // Équipe 1
+                          Column(
+                            children: [
+                              Container(
+                                width: 70,
+                                height: 70,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.grey.shade300,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: team?.logoUrl != null && team!.logoUrl!.isNotEmpty
+                                    ? ClipOval(
+                                        child: Image.network(
+                                          "${ApiConstants.imageUrl}${team.logoUrl!}",
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (_, __, ___) => const Icon(
+                                            Icons.sports_soccer,
+                                            size: 35,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      )
+                                    : const Icon(
+                                        Icons.sports_soccer,
+                                        size: 35,
+                                        color: Colors.grey,
+                                      ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                team?.name ?? 'FC Makina',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          // VS
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Colors.grey.shade300,
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              'vs',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                          ),
+
+                          // Équipe 2
+                          Column(
+                            children: [
+                              Container(
+                                width: 70,
+                                height: 70,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.grey.shade300,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.sports_soccer,
+                                  size: 35,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                'FC Mayorka',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Bouton d'action (ex: voir détails)
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Container(
+                          width: 45,
+                          height: 45,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.arrow_forward,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
+
+                const SizedBox(height: 20),
               ],
             ),
           ),

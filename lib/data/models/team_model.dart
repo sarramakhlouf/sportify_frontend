@@ -6,7 +6,6 @@ class TeamModel extends Team {
     super.id,
     required super.name,
     super.city,
-    required super.color,
     super.logoUrl,
     required super.ownerId,
     super.teamCode,
@@ -16,11 +15,13 @@ class TeamModel extends Team {
   });
 
   factory TeamModel.fromJson(Map<String, dynamic> json) {
+    final logoUrl = json['logoUrl'];
+    print("🔍 TeamModel.fromJson - logoUrl brut du JSON: $logoUrl");
+    
     return TeamModel(
-      id: (json['_id'] ?? json['id'] ?? '').toString(),
+      id: json['_id'] ?? json['id'],
       name: json['name'] ?? '',
       city: json['city'],
-      color: json['color'] ?? '#FFFFFF',
       logoUrl: json['logoUrl'],
       ownerId: (json['ownerId'] ?? '').toString(),
       teamCode: json['teamCode'],
@@ -40,7 +41,6 @@ class TeamModel extends Team {
     return {
       'name': name,
       'city': city,
-      'color': color,
       'logoUrl': logoUrl,
       'ownerId': ownerId,
       'isActivated': isActivated,
@@ -52,7 +52,6 @@ class TeamModel extends Team {
     String? id,
     String? name,
     String? city,
-    String? color,
     String? logoUrl,
     bool? isActivated,
     String? ownerId,
@@ -65,7 +64,6 @@ class TeamModel extends Team {
       id: id ?? this.id,
       name: name ?? this.name,
       city: city ?? this.city,
-      color: color ?? this.color,
       logoUrl: logoUrl ?? this.logoUrl,
       isActivated: isActivated ?? this.isActivated,
       ownerId: ownerId ?? this.ownerId,

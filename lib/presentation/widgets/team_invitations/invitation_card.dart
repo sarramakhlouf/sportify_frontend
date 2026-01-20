@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sportify_frontend/core/constants/api_constants.dart';
 import 'package:sportify_frontend/domain/entities/invitationNotif.dart';
 
 class InvitationCard extends StatelessWidget {
@@ -44,7 +45,7 @@ class InvitationCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                     image: invitation.teamLogo != null
                         ? DecorationImage(
-                            image: NetworkImage(invitation.teamLogo!),
+                            image: NetworkImage("${ApiConstants.imageUrl}${invitation.teamLogo!}"),
                             fit: BoxFit.cover,
                           )
                         : null,

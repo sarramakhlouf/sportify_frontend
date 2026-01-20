@@ -1,12 +1,12 @@
 import 'package:sportify_frontend/data/models/team_model.dart';
 import 'package:sportify_frontend/domain/repositories/team_repository.dart';
 
-class GetTeamsWhereUserIsMemberUseCase {
+class GetMemberTeamsUseCase {
   final TeamRepository repository;
 
-  GetTeamsWhereUserIsMemberUseCase(this.repository);
+  GetMemberTeamsUseCase(this.repository);
 
   Future<List<TeamModel>> call({required String userId}) async {
-    return repository.getTeamsWhereUserIsMember(userId: userId);
+    return repository.getMemberTeams(userId: userId);
   }
 }

@@ -9,6 +9,7 @@ class TeamRemoteDataSource {
 
   TeamRemoteDataSource(this.apiClient);
 
+//--------------------------------------CREATE TEAM-------------------------------------------
   Future<TeamModel> createTeam({required TeamModel team, File? image, required String token,}) async {
     final response = await apiClient.postMultipart(
       '/teams',
@@ -22,6 +23,7 @@ class TeamRemoteDataSource {
     return TeamModel.fromJson(response);
   }
 
+//--------------------------------------GET TEAMS BY OWNER-------------------------------------------
   Future<List<TeamModel>> getTeamsByOwner({
     required String ownerId,
   }) async {
@@ -32,7 +34,8 @@ class TeamRemoteDataSource {
     return response.map((e) => TeamModel.fromJson(e)).toList();
   }
 
-  Future<List<TeamModel>> getTeamsWhereUserIsMember({
+//--------------------------------------GET MEMBER TEAMS-------------------------------------------
+  Future<List<TeamModel>> getMemberTeams({
     required String userId,
   }) async {
     final response = await apiClient.getList(
@@ -42,6 +45,7 @@ class TeamRemoteDataSource {
     return response.map((e) => TeamModel.fromJson(e)).toList();
   }
 
+//--------------------------------------GET USER TEAMS-------------------------------------------
   Future<List<TeamModel>> getUserTeams({
     required String userId,
     required String token,
@@ -62,6 +66,7 @@ class TeamRemoteDataSource {
     return [...ownedTeams, ...memberTeams];
   }
 
+//--------------------------------------GET TEAM BY ID-------------------------------------------
   Future<TeamModel> getTeamById({
     required String teamId,
     required String token,
@@ -74,15 +79,26 @@ class TeamRemoteDataSource {
     return TeamModel.fromJson(response);
   }
 
-  Future<TeamModel> updateTeam(String teamId, TeamModel team, String token) async {
-    final response = await apiClient.put(
-      '/teams/$teamId',
+//--------------------------------------UPDATE TEAM-------------------------------------------
+  Future<TeamModel> updateTeam({
+    required String teamId,
+    required TeamModel team,
+    File? image,
+    required String token,
+  }) async {
+    final response = await apiClient.postMultipart(
+      '/teams/$teamId/update',
       team.toJson(),
+      file: image,
+      fileKey: 'image',
+      jsonKey: 'data',
       token: token,
     );
+
     return TeamModel.fromJson(response);
   }
 
+//--------------------------------------ACTIVATE TEAM-------------------------------------------
   Future<TeamModel> activateTeam({required String teamId, required String ownerId, required String token}) async {
     final response = await apiClient.put(
       '/teams/activate/$teamId/owner/$ownerId', 
@@ -92,6 +108,7 @@ class TeamRemoteDataSource {
     return TeamModel.fromJson(response);
   }
 
+//-------------------------------------DEACTIVATE TEAM-------------------------------------------
   Future<TeamModel> deactivateTeam({
     required String teamId,
     required String token,
@@ -105,6 +122,7 @@ class TeamRemoteDataSource {
     return TeamModel.fromJson(response);
   }
 
+//--------------------------------------GET TEAM PLAYERS-------------------------------------------
   Future<List<PlayerModel>> getTeamPlayers({
     required String teamId,
   }) async {
@@ -124,5 +142,15 @@ class TeamRemoteDataSource {
     return UserModel.fromJson(response);
   }
 
+//--------------------------------------DELETE TEAM-------------------------------------------
+  Future<void> deleteTeam({
+    required String teamId,
+    required String token,
+  }) async {
+    await apiClient.delete(
+      '/teams/$teamId',
+      token: token,
+    );
+  }
 
 }

@@ -7,6 +7,7 @@ import 'package:collection/collection.dart';
 import 'package:sportify_frontend/domain/usecases/activate_team_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/create_team_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/deactivate_teamusecase.dart';
+import 'package:sportify_frontend/domain/usecases/delete_team_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/get_team_players_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/get_teams_by_id_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/get_teams_by_owner_usecase.dart';
@@ -19,25 +20,27 @@ class TeamViewModel extends ChangeNotifier {
   final CreateTeamUseCase createTeamUseCase;
   final GetTeamPlayersUseCase getTeamPlayersUseCase;
   final GetTeamsByOwnerUseCase getTeamsByOwnerUseCase;
-  final GetTeamsWhereUserIsMemberUseCase getTeamsWhereUserIsMemberUseCase;
+  final GetMemberTeamsUseCase getMemberTeamsUseCase;
   final GetUserTeamsUseCase getUserTeamsUseCase;
   final GetTeamByIdUseCase getTeamByIdUseCase;
   final UpdateTeamUseCase updateTeamUseCase;
   final ActivateTeamUseCase activateTeamUseCase;
   final DeactivateTeamUseCase deactivateTeamUseCase;
   final GetUserByIdUseCase getUserByIdUseCase;
+  final DeleteTeamUseCase deleteTeamUseCase;
 
   TeamViewModel({
     required this.createTeamUseCase,
     required this.getTeamPlayersUseCase,
     required this.getTeamsByOwnerUseCase,
-    required this.getTeamsWhereUserIsMemberUseCase,
+    required this.getMemberTeamsUseCase,
     required this.getUserTeamsUseCase,
     required this.getTeamByIdUseCase,
     required this.updateTeamUseCase,
     required this.activateTeamUseCase,
     required this.deactivateTeamUseCase,
-    required this.getUserByIdUseCase, 
+    required this.getUserByIdUseCase,
+    required this.deleteTeamUseCase,
   });
 
   bool isLoading = false;
@@ -52,10 +55,10 @@ class TeamViewModel extends ChangeNotifier {
   String? selectedTeamId;
   TeamModel? selectedTeam;
 
+//--------------------------------------CREATE TEAM-------------------------------------------
   Future<void> createTeam({
     required String name,
     String? city,
-    required String color,
     required String ownerId,
     required String token,
     File? image,
@@ -69,7 +72,6 @@ class TeamViewModel extends ChangeNotifier {
         team: Team(
           name: name,
           city: city,
-          color: color,
           ownerId: ownerId,
           isActivated: false,
         ),
@@ -87,6 +89,7 @@ class TeamViewModel extends ChangeNotifier {
     }
   }
 
+//--------------------------------------FETCH TEAMS-------------------------------------------
   Future<void> fetchTeams({
     required String ownerId,
     required String token,
@@ -96,7 +99,7 @@ class TeamViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      teams = await getUserTeamsUseCase(userId: ownerId, token: token,);
+      teams = await getUserTeamsUseCase(userId: ownerId, token: token);
 
       final TeamModel? active = teams.firstWhereOrNull((t) => t.isActivated);
 
@@ -107,10 +110,7 @@ class TeamViewModel extends ChangeNotifier {
       for (var team in teams) {
         if (team.id != null) {
           try {
-            final ownerUser = await getUserByIdUseCase(
-              team.ownerId,
-              token,
-            );
+            final ownerUser = await getUserByIdUseCase(team.ownerId, token);
             /*final ownerPlayer = PlayerModel(
               id: ownerUser.id,
               name: '${ownerUser.firstname} ${ownerUser.lastname}',
@@ -144,6 +144,7 @@ class TeamViewModel extends ChangeNotifier {
     }
   }
 
+//--------------------------------------FETCH OWNED TEAMS-------------------------------------------
   Future<void> fetchOwnedTeams(String ownerId, String token) async {
     isLoading = true;
     error = null;
@@ -165,13 +166,14 @@ class TeamViewModel extends ChangeNotifier {
     }
   }
 
+//--------------------------------------FETCH MEMBER TEAMS-------------------------------------------
   Future<void> fetchMemberTeams(String userId) async {
     isLoading = true;
     error = null;
     notifyListeners();
 
     try {
-      memberTeams = await getTeamsWhereUserIsMemberUseCase(userId: userId);
+      memberTeams = await getMemberTeamsUseCase(userId: userId);
     } catch (e) {
       error = e.toString();
       memberTeams = [];
@@ -181,6 +183,7 @@ class TeamViewModel extends ChangeNotifier {
     }
   }
 
+//--------------------------------------ACTIVATE TEAM-------------------------------------------
   Future<void> activateTeam({
     required String teamId,
     required String ownerId,
@@ -219,26 +222,7 @@ class TeamViewModel extends ChangeNotifier {
     }
   }
 
-  Future<TeamModel?> fetchTeamById({
-    required String teamId,
-    required String token,
-  }) async {
-    isLoading = true;
-    error = null;
-    notifyListeners();
-
-    try {
-      final team = await getTeamByIdUseCase(teamId, token);
-      return team;
-    } catch (e) {
-      error = e.toString();
-      return null;
-    } finally {
-      isLoading = false;
-      notifyListeners();
-    }
-  }
-
+//--------------------------------------DEACTIVATE TEAM-------------------------------------------
   Future<void> deactivateTeam({
     required String teamId,
     required String token,
@@ -269,6 +253,34 @@ class TeamViewModel extends ChangeNotifier {
     }
   }
 
+//--------------------------------------FETCH TEAM BY ID-------------------------------------------
+  Future<TeamModel?> fetchTeamById({
+    required String teamId,
+    required String token,
+  }) async {
+    isLoading = true;
+    error = null;
+    notifyListeners();
+
+    try {
+      final team = await getTeamByIdUseCase(teamId, token);
+
+      teams = teams.map((t) {
+        if (t.id == teamId) return team;
+        return t;
+      }).toList();
+
+      return team;
+    } catch (e) {
+      error = e.toString();
+      return null;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+//--------------------------------------FETCH TEAM PLAYERS-------------------------------------------
   Future<void> fetchTeamPlayers(String teamId, String token) async {
     isLoading = true;
     error = null;
@@ -301,6 +313,7 @@ class TeamViewModel extends ChangeNotifier {
     }
   }
 
+//--------------------------------------FETCH PLAYERS COUNT FOR TEAM-------------------------------------------
   Future<void> fetchPlayersCountForTeam(String teamId) async {
     try {
       final members = await getTeamPlayersUseCase(teamId);
@@ -314,22 +327,50 @@ class TeamViewModel extends ChangeNotifier {
     }
   }
 
+//--------------------------------------UPDATE TEAM-------------------------------------------
+  Future<void> updateTeam({
+    required String teamId,
+    required TeamModel updatedTeam,
+    File? image,
+    required String token,
+  }) async {
+    isLoading = true;
+    error = null;
+    notifyListeners();
+
+    try {
+      final TeamModel team = await updateTeamUseCase(
+        teamId: teamId,
+        team: updatedTeam,
+        image: image,
+        token: token,
+      );
+
+      teams = teams.map((t) {
+        if (t.id == teamId) return team;
+        return t;
+      }).toList();
+
+      print("TEAM UPDATED: ${team.name}");
+    } catch (e) {
+      error = e.toString();
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+//--------------------------------------LOAD TEAM DETAILS-------------------------------------------
   Future<TeamModel?> loadTeamDetails({
     required TeamModel team,
     required String token,
   }) async {
     try {
       if (team.id == null) return null;
-
-      // Récupère le propriétaire
+  
       final owner = await getUserByIdUseCase(team.ownerId, token);
-
-      // Récupère tous les membres
       final members = await getTeamPlayersUseCase(team.id!);
-
-      // Crée une copie du team avec les joueurs
-      final TeamDeatiled = team.copyWith(
-        // tu peux ajouter un champ players si TeamModel le supporte
+      final teamDetailed = team.copyWith(
         players: [
           PlayerModel(
             id: owner.id,
@@ -337,20 +378,42 @@ class TeamViewModel extends ChangeNotifier {
             avatarUrl: owner.profileImageUrl,
             role: "owner",
           ),
-          ...members.map((m) => PlayerModel(
-                id: m.id,
-                name: m.name,
-                avatarUrl: m.avatarUrl,
-                role: m.role ?? "bench",
-              )),
+          ...members.map(
+            (m) => PlayerModel(
+              id: m.id,
+              name: m.name,
+              avatarUrl: m.avatarUrl,
+              role: m.role ?? "bench",
+            ),
+          ),
         ],
       );
 
-      return TeamDeatiled;
+      return teamDetailed;
     } catch (e) {
       print("ERROR loadFullTeamDetails: $e");
-      return team; // retourne au moins l’équipe originale
+      return team;
     }
   }
 
+//--------------------------------------DELETE TEAM-------------------------------------------
+  Future<void> deleteTeam({
+    required String teamId,
+    required String token,
+  }) async {
+    try {
+      isLoading = true;
+      notifyListeners();
+
+      await deleteTeamUseCase(teamId: teamId, token: token);
+
+      teams.removeWhere((t) => t.id == teamId);
+      ownedTeams.removeWhere((t) => t.id == teamId);
+    } catch (e) {
+      debugPrint("Delete team error: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
 }

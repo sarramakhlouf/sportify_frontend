@@ -239,10 +239,20 @@ class _MyTeamsScreenState extends State<MyTeamsScreen> {
                                     ? ClipRRect(
                                         borderRadius: BorderRadius.circular(18),
                                         child: Image.network(
-                                          "${ApiConstants.imagesUrl}${team.logoUrl!}",
+                                          "${ApiConstants.imageUrl}${team.logoUrl!}",
                                           width: 36,
                                           height: 36,
                                           fit: BoxFit.cover,
+                                          loadingBuilder: (context, child, loadingProgress) {
+                                            if (loadingProgress == null) return child;
+                                            return const Center(
+                                              child: CircularProgressIndicator(strokeWidth: 2),
+                                            );
+                                          },
+                                          errorBuilder: (context, error, stackTrace) {
+                                            print('Erreur chargement image: $error');
+                                            return const Icon(Icons.sports_soccer, size: 36);
+                                          },
                                         ),
                                       )
                                     : const Icon(Icons.sports_soccer),

@@ -8,6 +8,7 @@ class AuthRemoteDataSource {
   final ApiClient client;
   AuthRemoteDataSource(this.client);
 
+//--------------------------------------REGISTER-------------------------------------------
   Future<User> register(Map<String, dynamic> body, File? profileImage) async {
     print('➡️ Envoi inscription: $body');
 
@@ -28,6 +29,7 @@ class AuthRemoteDataSource {
     return UserModel.fromJson(res['user']);
   }
 
+//--------------------------------------LOGIN-------------------------------------------
   Future<User> login(String email, String password) async {
     print('➡️ Login request: $email');
 
@@ -43,11 +45,10 @@ class AuthRemoteDataSource {
     if (accessToken != null && refreshToken != null) {
       await TokenStorage.saveTokens(accessToken, refreshToken);
     }
-
-    // Récupérer les infos utilisateur via auto-login
     return autoLogin(accessToken!);
   }
 
+//--------------------------------------AUTOLOGIN-------------------------------------------
   Future<User> autoLogin(String token) async {
     final res = await client.get('/auth/auto-login', token: token);
     return UserModel.fromJson(res);
@@ -70,6 +71,7 @@ class AuthRemoteDataSource {
     }
   }
 
+//--------------------------------------LOGOUT-------------------------------------------
   Future<void> logout() async {
     final accessToken = await TokenStorage.getAccessToken();
 
@@ -84,22 +86,26 @@ class AuthRemoteDataSource {
     }
   }
 
+//--------------------------------------REQUEST OTP-------------------------------------------
   Future<void> requestOtp(String email) async {
     final uri = '/auth/forgot-password/request-otp?email=$email';
     await client.post(uri, {});
   }
 
+//--------------------------------------VERIFY OTP-------------------------------------------
   Future<void> verifyOtp(String email, String otp) async {
     final uri = '/auth/forgot-password/verify-otp?email=$email&otp=$otp';
     await client.post(uri, {});
   }
 
+//--------------------------------------RESET PASSWORD-------------------------------------------
   Future<void> resetPassword(String email, String newPassword) async {
     final uri =
         '/auth/forgot-password/reset?email=$email&newPassword=$newPassword';
     await client.post(uri, {});
   }
 
+//--------------------------------------REFRESH TOKEN-------------------------------------------
   Future<bool> _refreshToken() async {
     final refreshToken = await TokenStorage.getRefreshToken();
     if (refreshToken == null) return false;
@@ -119,6 +125,7 @@ class AuthRemoteDataSource {
     }
   }
 
+//--------------------------------------UPDATE PROFILE-------------------------------------------
   Future<User> updateProfile(
     String userId,
     Map<String, dynamic> data,
@@ -131,15 +138,14 @@ class AuthRemoteDataSource {
       "phone": data['phone'],
     };
 
-    // Ajouter le mot de passe uniquement si l'utilisateur veut le changer
     if (data.containsKey('password') &&
         data['password'] != null &&
         data['password'] != '') {
       if (data['currentPassword'] == null || data['currentPassword'].isEmpty) {
         throw Exception("Le mot de passe actuel est requis pour changer le mot de passe");
       }
-      body['password'] = data['password'];          // nouveau mot de passe
-      body['currentPassword'] = data['currentPassword']; // mot de passe actuel
+      body['password'] = data['password'];  
+      body['currentPassword'] = data['currentPassword']; 
     }
 
     print("updateProfile body envoyé: $body");

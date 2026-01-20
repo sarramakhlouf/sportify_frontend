@@ -17,6 +17,7 @@ import 'package:sportify_frontend/domain/usecases/activate_team_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/auto_login_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/create_team_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/deactivate_teamusecase.dart';
+import 'package:sportify_frontend/domain/usecases/delete_team_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/get_notifications_usecase.dart';
 import 'package:sportify_frontend/domain/usecases/get_pending_invitations.dart';
 import 'package:sportify_frontend/domain/usecases/get_team_players_usecase.dart';
@@ -105,13 +106,14 @@ void main() {
             createTeamUseCase: CreateTeamUseCase(teamRepository),
             getTeamPlayersUseCase: GetTeamPlayersUseCase(teamRepository), 
             getTeamsByOwnerUseCase: GetTeamsByOwnerUseCase(teamRepository),
-            getTeamsWhereUserIsMemberUseCase: GetTeamsWhereUserIsMemberUseCase(teamRepository),
+            getMemberTeamsUseCase: GetMemberTeamsUseCase(teamRepository),
             getUserTeamsUseCase: GetUserTeamsUseCase(teamRepository),
             getTeamByIdUseCase: GetTeamByIdUseCase(teamRepository),
             updateTeamUseCase: UpdateTeamUseCase(teamRepository),
             activateTeamUseCase: ActivateTeamUseCase(teamRepository),
             deactivateTeamUseCase: DeactivateTeamUseCase(teamRepository),
             getUserByIdUseCase: GetUserByIdUseCase(teamRepository),
+            deleteTeamUseCase: DeleteTeamUseCase(teamRepository),
           ),
         ),
         

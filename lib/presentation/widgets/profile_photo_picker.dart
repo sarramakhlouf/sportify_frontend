@@ -45,7 +45,7 @@ class _ProfilePhotoPickerState extends State<ProfilePhotoPicker> {
     } else if (widget.imageUrl != null && widget.imageUrl!.isNotEmpty) {
       final String fullUrl = widget.imageUrl!.startsWith('http')
           ? widget.imageUrl!
-          : "${widget.baseUrl}${widget.imageUrl}"; // <- utiliser widget.baseUrl
+          : "${widget.baseUrl}${widget.imageUrl}"; 
 
       imageProvider = NetworkImage(fullUrl);
     }

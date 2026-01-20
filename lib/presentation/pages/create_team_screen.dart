@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sportify_frontend/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:sportify_frontend/presentation/viewmodels/team_viewmodel.dart';
-import 'package:sportify_frontend/presentation/widgets/create_team/team_color_picker.dart';
 import 'package:sportify_frontend/presentation/widgets/create_team/team_form_header.dart';
 import 'package:sportify_frontend/presentation/widgets/create_team/team_image_picker.dart';
 import 'package:sportify_frontend/presentation/widgets/create_team/team_preview_card.dart';
@@ -20,8 +19,8 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
   final nameCtrl = TextEditingController();
   final cityCtrl = TextEditingController();
 
-  String selectedColor = '#22C55E';
   File? teamLogo;
+  Color selectedColor = const Color(0xFF22C55E);
 
   bool get isFormValid => nameCtrl.text.trim().isNotEmpty;
 
@@ -39,6 +38,7 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
+      resizeToAvoidBottomInset: false,
       bottomNavigationBar: _bottomBar(teamVM, authVM),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -66,8 +66,8 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                   const SizedBox(height: 24),
 
                   const TeamSectionTitle(
-                    icon: Icons.photo_camera_outlined,
-                    title: "Logo de l'équipe",
+                    icon: Icons.photo_camera,
+                    title: "Photo de l'équipe",
                   ),
                   const SizedBox(height: 10),
                   TeamImagePicker(
@@ -77,37 +77,36 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
 
                   const SizedBox(height: 20),
                   const TeamSectionTitle(
-                    icon: Icons.badge_outlined,
+                    icon: Icons.badge,
                     title: "Nom de l'équipe",
                   ),
                   const SizedBox(height: 6),
-                  _textField(nameCtrl, 'Nom', required: true),
+                  _textField(nameCtrl, 'Ex: Les Champions...', required: true),
 
                   const SizedBox(height: 16),
                   const TeamSectionTitle(
-                    icon: Icons.location_on_outlined,
-                    title: "Ville (optionnel)",
+                    icon: Icons.location_on,
+                    title: "Ville",
+                    subtitle: "(optionnel)",
                   ),
                   const SizedBox(height: 6),
                   _textField(cityCtrl, 'Ex: Tunis'),
 
-                  const SizedBox(height: 20),
-                  const TeamSectionTitle(
-                    icon: Icons.palette_outlined,
-                    title: "Couleur de l'équipe",
-                  ),
-                  const SizedBox(height: 10),
-                  TeamColorPicker(
-                    selectedColor: selectedColor,
-                    onSelect: (color) =>
-                        setState(() => selectedColor = color),
-                  ),
-
                   if (nameCtrl.text.isNotEmpty) ...[
                     const SizedBox(height: 24),
+                    const Text(
+                      'APERÇU',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     TeamPreviewCard(
                       teamName: nameCtrl.text,
-                      colorHex: selectedColor,
+                      teamLogo: teamLogo,
                     ),
                   ],
                 ],
@@ -126,12 +125,25 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
       onChanged: (_) => setState(() {}),
       decoration: InputDecoration(
         hintText: hint,
+        hintStyle: TextStyle(color: Colors.grey.shade400),
         suffixIcon: required && ctrl.text.isNotEmpty
             ? const Icon(Icons.check_circle, color: Colors.green)
             : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey.shade300),
         ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFF22C55E), width: 2),
+        ),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
     );
   }
@@ -151,25 +163,57 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                   await teamVM.createTeam(
                     name: nameCtrl.text.trim(),
                     city: cityCtrl.text.trim(),
-                    color: selectedColor,
                     ownerId: user.id,
                     token: token,
                     image: teamLogo,
                   );
 
-                  if (teamVM.error == null && mounted) {
-                    Navigator.pop(context);
+                  if (!mounted) return;
+
+                  if (teamVM.error == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${nameCtrl.text.trim()} créée avec succès'),
+                        backgroundColor: Colors.green,
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+
+                    Navigator.pop(context, true);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Erreur: ${teamVM.error}'),
+                        backgroundColor: Colors.red,
+                        duration: const Duration(seconds: 3),
+                      ),
+                    );
                   }
                 },
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF22C55E),
-            padding: const EdgeInsets.symmetric(vertical: 14),
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            elevation: 0,
           ),
           child: teamVM.isLoading
-              ? const CircularProgressIndicator(color: Colors.white)
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
               : const Text(
                   "Créer l'équipe",
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
         ),
       ),

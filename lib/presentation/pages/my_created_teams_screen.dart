@@ -17,19 +17,21 @@ class _MyCreatedTeamsScreenState extends State<MyCreatedTeamsScreen> {
   @override
   void initState() {
     super.initState();
+    _loadTeams();
+  }
 
+  Future<void> _loadTeams() async {
     final teamVM = context.read<TeamViewModel>();
     final authVM = context.read<AuthViewModel>();
 
     final ownerId = authVM.currentUser?.id;
     if (ownerId != null) {
-      TokenStorage.getAccessToken().then((token) {
-        if (token != null) {
-          teamVM.fetchOwnedTeams(ownerId, token);
-        } else {
-          print("Token est null, impossible de récupérer les équipes.");
-        }
-      });
+      final token = await TokenStorage.getAccessToken();
+      if (token != null) {
+        teamVM.fetchOwnedTeams(ownerId, token);
+      } else {
+        print("Token est null, impossible de récupérer les équipes.");
+      }
     } else {
       print("OwnerId est null, impossible de récupérer les équipes.");
     }
@@ -60,7 +62,13 @@ class _MyCreatedTeamsScreenState extends State<MyCreatedTeamsScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            Expanded(child: MyTeamsList()),
+            Expanded(
+              child: Consumer<TeamViewModel>(
+                builder: (context, teamVM, child) {
+                  return MyTeamsList();
+                },
+              ),
+            ),
           ],
         ),
       ),

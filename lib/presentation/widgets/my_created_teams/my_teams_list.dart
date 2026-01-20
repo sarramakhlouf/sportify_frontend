@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sportify_frontend/core/storage/token_storage.dart';
 import 'package:sportify_frontend/data/models/team_model.dart';
 import 'package:sportify_frontend/presentation/pages/team_details_screen.dart';
 import 'package:sportify_frontend/presentation/viewmodels/auth_viewmodel.dart';
@@ -8,28 +9,6 @@ import 'package:sportify_frontend/presentation/widgets/my_created_teams/team_car
 
 class MyTeamsList extends StatelessWidget {
   const MyTeamsList({super.key});
-
-  /*void _onTeamTap(BuildContext context, TeamModel team) async {
-    final authVM = context.read<AuthViewModel>();
-    final teamVM = context.read<TeamViewModel>();
-
-    final token = await authVM.getToken();
-    if (token == null) return;
-
-    await teamVM.loadTeamDetails(
-      team: team,
-      token: token,
-    );
-
-    if (!context.mounted) return;
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const TeamDetailsScreen(),
-      ),
-    );
-  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -65,13 +44,6 @@ class MyTeamsList extends StatelessWidget {
             final token = await authVM.getToken();
             if (token == null) return;
 
-            await teamVM.loadTeamDetails(
-              team: team,
-              token: token,
-            );
-
-            if (!context.mounted) return;
-
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -79,8 +51,53 @@ class MyTeamsList extends StatelessWidget {
               ),
             );
           },
-          onDelete: () {
-            // teamVM.deleteTeam(team.id!);
+          onDelete: () async {
+            debugPrint("========================================");
+            debugPrint("Suppression de l'équipe depuis TeamCardItem");
+            debugPrint("Team ID: ${team.id}");
+            debugPrint("Team Name: ${team.name}");
+            debugPrint("========================================");
+
+            final token = await TokenStorage.getAccessToken();
+            
+            if (token == null) {
+              if (!context.mounted) return;
+              
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Erreur: Token non disponible'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+              return;
+            }
+
+            await teamVM.deleteTeam(
+              teamId: team.id!,
+              token: token,
+            );
+
+            if (!context.mounted) return;
+
+            if (teamVM.error == null) {
+              debugPrint("ÉQUIPE SUPPRIMÉE AVEC SUCCÈS");
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('${team.name} supprimée avec succès'),
+                  backgroundColor: Colors.green,
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            } else {
+              debugPrint("ERREUR SUPPRESSION: ${teamVM.error}");
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Erreur: ${teamVM.error}'),
+                  backgroundColor: Colors.red,
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+            }
           },
         );
       },

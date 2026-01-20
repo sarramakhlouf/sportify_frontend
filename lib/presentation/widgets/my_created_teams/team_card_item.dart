@@ -22,6 +22,44 @@ class TeamCardItem extends StatelessWidget {
     this.onTap,
   });
 
+  Future<void> _showDeleteConfirmation(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Text(
+          "Supprimer l'équipe",
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
+        content: Text(
+          "Êtes-vous sûr de vouloir supprimer '$teamName' ? Cette action est irréversible.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text(
+              "Annuler",
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text(
+              "Supprimer",
+              style: TextStyle(color: Color(0xFFE53935)),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && onDelete != null) {
+      onDelete!();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -53,7 +91,7 @@ class TeamCardItem extends StatelessWidget {
               child: teamLogo != null
                   ? ClipOval(
                       child: Image.network(
-                        "${ApiConstants.imagesUrl}$teamLogo",
+                        "${ApiConstants.imageUrl}$teamLogo",
                         width: 40,
                         height: 40,
                         fit: BoxFit.cover,
@@ -157,7 +195,7 @@ class TeamCardItem extends StatelessWidget {
             ),
 
             IconButton(
-              onPressed: onDelete,
+              onPressed: () => _showDeleteConfirmation(context),
               icon: const Icon(Icons.delete_outline),
               color: Colors.redAccent,
             ),

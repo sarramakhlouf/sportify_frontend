@@ -22,7 +22,6 @@ class TeamRepositoryImpl implements TeamRepository {
       team: TeamModel(
         name: team.name,
         city: team.city,
-        color: team.color,
         logoUrl: team.logoUrl,
         ownerId: team.ownerId,
       ),
@@ -37,27 +36,48 @@ class TeamRepositoryImpl implements TeamRepository {
   }
 
   @override
-  Future<List<TeamModel>> getTeamsWhereUserIsMember({required String userId}) async {
-    return await remoteDataSource.getTeamsWhereUserIsMember(userId: userId);
+  Future<List<TeamModel>> getMemberTeams({required String userId}) async {
+    return await remoteDataSource.getMemberTeams(userId: userId);
   }
 
   @override
-  Future<List<TeamModel>> getUserTeams({required String userId, required String token,}){
+  Future<List<TeamModel>> getUserTeams({
+    required String userId, 
+    required String token,
+  }){
     return remoteDataSource.getUserTeams( userId: userId, token: token,);
   }
 
   @override
-  Future<TeamModel> getTeamById(String teamId, String token) {
+  Future<TeamModel> getTeamById(
+    String teamId, 
+    String token
+  ) {
     return remoteDataSource.getTeamById(teamId: teamId, token: token);
   }
 
   @override
-  Future<TeamModel> updateTeam(String teamId, TeamModel team, String token) {
-    return remoteDataSource.updateTeam(teamId, team, token);
+  Future<TeamModel> updateTeam({
+    required String teamId,
+    required TeamModel team,
+    File? image,
+    required String token,
+  }) {
+    return remoteDataSource.updateTeam(
+      teamId: teamId,
+      team: team,
+      image: image,
+      token: token,
+    );
   }
 
+
   @override
-  Future<TeamModel> activateTeam(String teamId, String ownerId, String token) {
+  Future<TeamModel> activateTeam(
+    String teamId, 
+    String ownerId, 
+    String token
+  ) {
     return remoteDataSource.activateTeam(
       teamId: teamId,
       ownerId: ownerId,
@@ -66,7 +86,10 @@ class TeamRepositoryImpl implements TeamRepository {
   }
 
   @override
-  Future<TeamModel> deactivateTeam(String teamId, String token) {
+  Future<TeamModel> deactivateTeam(
+    String teamId, 
+    String token
+  ) {
     return remoteDataSource.deactivateTeam(teamId: teamId, token: token);
   }
 
@@ -76,7 +99,22 @@ class TeamRepositoryImpl implements TeamRepository {
   }
 
   @override
-  Future<UserModel> getUserById(String userId, String token) {
+  Future<UserModel> getUserById(
+    String userId, 
+    String token
+  ) {
     return remoteDataSource.getUserById(userId: userId, token: token);
   }
+
+  @override
+  Future<void> deleteTeam({
+    required String teamId,
+    required String token,
+  }) {
+    return remoteDataSource.deleteTeam(
+      teamId: teamId,
+      token: token,
+    );
+  }
+
 }

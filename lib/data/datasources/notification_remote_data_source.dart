@@ -7,6 +7,7 @@ class NotificationRemoteDataSource{
 
   NotificationRemoteDataSource(this.apiClient);
 
+//--------------------------------------GET NOTIFICATIONS-------------------------------------------
   Future<List<NotificationModel>> getNotifications(String userId) async {
     final response =
         await apiClient.getList('/notifications/$userId');
@@ -16,6 +17,7 @@ class NotificationRemoteDataSource{
         .toList();
   }
 
+//--------------------------------------GET INVITATION NOTIFICATIONS-------------------------------------------
    Future<List<InvitationNotifModel>> getInvitationNotifications() async {
     final response =
         await apiClient.getList('/notifications/invitations');
@@ -24,5 +26,4 @@ class NotificationRemoteDataSource{
         .map((e) => InvitationNotifModel.fromJson(e))
         .toList();
   }
-
 }

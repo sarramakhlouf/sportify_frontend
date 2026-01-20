@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sportify_frontend/core/constants/api_constants.dart';
 import 'package:sportify_frontend/presentation/pages/team_details_screen.dart';
 import 'package:sportify_frontend/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:sportify_frontend/presentation/viewmodels/team_viewmodel.dart';
@@ -27,7 +28,7 @@ class _TeamsMemberScreenState extends State<TeamsMemberScreen> {
     final authVM = context.read<AuthViewModel>();
 
     final userId = authVM.currentUser?.id;
-    //final token = await authVM.getToken(); 
+    //final token = await authVM.getToken();
 
     if (userId != null) {
       await teamVM.fetchMemberTeams(userId);
@@ -81,7 +82,7 @@ class _TeamsMemberScreenState extends State<TeamsMemberScreen> {
             if (!teamVM.isLoading && teamVM.memberTeams.isNotEmpty)
               Expanded(
                 child: ListView.separated(
-                  itemCount: teamVM.memberTeams.length + 1, 
+                  itemCount: teamVM.memberTeams.length + 1,
                   separatorBuilder: (_, __) => const SizedBox(height: 20),
                   itemBuilder: (context, index) {
                     if (index == teamVM.memberTeams.length) {
@@ -91,6 +92,9 @@ class _TeamsMemberScreenState extends State<TeamsMemberScreen> {
                     final team = teamVM.memberTeams[index];
                     return TeamCard(
                       teamName: team.name,
+                      teamLogo: team.logoUrl != null 
+                        ? '${ApiConstants.baseUrl}${team.logoUrl}' 
+                        : null,
                       teamRole: "MEMBRE",
                       city: team.city ?? '',
                       playersCount: teamVM.teamPlayersCount[team.id] ?? 0,
@@ -99,10 +103,7 @@ class _TeamsMemberScreenState extends State<TeamsMemberScreen> {
                         final token = await authVM.getToken();
                         if (token == null) return;
 
-                        await teamVM.loadTeamDetails(
-                          team: team,
-                          token: token,
-                        );
+                        await teamVM.loadTeamDetails(team: team, token: token);
 
                         if (!context.mounted) return;
 

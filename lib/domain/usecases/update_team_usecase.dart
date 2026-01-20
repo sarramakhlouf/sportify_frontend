@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:sportify_frontend/domain/repositories/team_repository.dart';
 import 'package:sportify_frontend/data/models/team_model.dart';
 
@@ -9,8 +11,15 @@ class UpdateTeamUseCase {
   Future<TeamModel> call({
     required String teamId,
     required TeamModel team,
+    File? image,
     required String token,
   }) {
-    return repository.updateTeam(teamId, team, token);
+    return repository.updateTeam(
+      teamId: teamId,
+      team: team,
+      image: image,
+      token: token,
+    );
   }
 }
+

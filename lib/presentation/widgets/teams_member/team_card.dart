@@ -23,6 +23,13 @@ class TeamCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('=== TeamCard Build ===');
+    print('Team Name: $teamName');
+    print('Team Logo: $teamLogo');
+    print('Team Logo is null: ${teamLogo == null}');
+    print('Team Logo is empty: ${teamLogo?.isEmpty}');
+    print('Team Logo length: ${teamLogo?.length}');
+    
     final createdText = createdAt != null
         ? DateFormat('dd MMM', 'fr').format(createdAt!)
         : '-';
@@ -43,10 +50,13 @@ class TeamCard extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: Colors.black,
+                    color: teamLogo != null && teamLogo!.isNotEmpty
+                        ? Colors.transparent
+                        : Colors.black,
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Icon(Icons.sports_soccer, color: Colors.white),
+                  clipBehavior: Clip.antiAlias,
+                  child: _buildLogoWidget(),
                 ),
                 const SizedBox(width: 12),
 
@@ -111,6 +121,76 @@ class TeamCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildLogoWidget() {
+    if (teamLogo == null || teamLogo!.isEmpty) {
+      debugPrint('Logo is null or empty - showing default icon');
+      return const Icon(Icons.sports_soccer, color: Colors.white);
+    }
+
+    debugPrint('Logo value: "$teamLogo"');
+    debugPrint('Logo starts with http: ${teamLogo!.startsWith('http')}');
+    debugPrint('Logo starts with https: ${teamLogo!.startsWith('https')}');
+    debugPrint('Logo starts with assets: ${teamLogo!.startsWith('assets')}');
+
+    if (teamLogo!.startsWith('http://') || teamLogo!.startsWith('https://')) {
+      debugPrint('Loading network image from: $teamLogo');
+      return Image.network(
+        teamLogo!,
+        width: 44,
+        height: 44,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) {
+            return child;
+          }
+          final progress = loadingProgress.cumulativeBytesLoaded / 
+              (loadingProgress.expectedTotalBytes ?? 1);
+          return Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              value: progress,
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          debugPrint('ERROR loading network image:');
+          debugPrint('Error: $error');
+          debugPrint('StackTrace: $stackTrace');
+          return const Icon(Icons.sports_soccer, color: Colors.white);
+        },
+      );
+    }
+
+    if (teamLogo!.startsWith('assets/')) {
+      debugPrint('Loading asset image from: $teamLogo');
+      return Image.asset(
+        teamLogo!,
+        width: 44,
+        height: 44,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          debugPrint('ERROR loading asset image:');
+          debugPrint('Error: $error');
+          debugPrint('StackTrace: $stackTrace');
+          return const Icon(Icons.sports_soccer, color: Colors.white);
+        },
+      );
+    }
+    
+    return Image.network(
+      teamLogo!,
+      width: 44,
+      height: 44,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        debugPrint('ERROR loading image (default case):');
+        debugPrint('Error: $error');
+        debugPrint('StackTrace: $stackTrace');
+        return const Icon(Icons.sports_soccer, color: Colors.white);
+      },
     );
   }
 

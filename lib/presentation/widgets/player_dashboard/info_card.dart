@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sportify_frontend/core/constants/api_constants.dart';
 
 class InfoCard extends StatelessWidget {
   final String title;
@@ -29,12 +30,12 @@ class InfoCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: background,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.15),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -45,24 +46,38 @@ class InfoCard extends StatelessWidget {
               children: [
                 if (icon != null)
                   Container(
-                    width: 38,
-                    height: 38,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withOpacity(0.25),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(icon, color: Colors.white),
+                    child: Icon(icon, color: Colors.white, size: 24),
                   ),
                 if (avatarUrl != null)
-                  CircleAvatar(
-                    radius: 19,
-                    backgroundImage: NetworkImage(avatarUrl!),
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.3),
+                        width: 2,
+                      ),
+                    ),
+                    child: CircleAvatar(
+                      radius: 20,
+                      backgroundImage: NetworkImage(
+                        "${ApiConstants.imageUrl}${avatarUrl!}",
+                      ),
+                      backgroundColor: Colors.white.withOpacity(0.2),
+                    ),
                   ),
                 const Spacer(),
                 if (badgeText != null)
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.25),
                       borderRadius: BorderRadius.circular(12),
@@ -72,6 +87,7 @@ class InfoCard extends StatelessWidget {
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
+                        fontSize: 13,
                       ),
                     ),
                   ),
@@ -82,7 +98,7 @@ class InfoCard extends StatelessWidget {
               title,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -91,7 +107,8 @@ class InfoCard extends StatelessWidget {
               subtitle,
               style: TextStyle(
                 color: Colors.white.withOpacity(0.85),
-                fontSize: 12,
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -100,4 +117,3 @@ class InfoCard extends StatelessWidget {
     );
   }
 }
-

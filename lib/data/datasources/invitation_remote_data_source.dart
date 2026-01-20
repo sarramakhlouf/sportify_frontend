@@ -6,6 +6,7 @@ class InvitationRemoteDataSource {
 
   InvitationRemoteDataSource(this.apiClient);
 
+//--------------------------------------INVITE PLAYER-------------------------------------------
   Future<void> invitePlayer({
     required String teamId,
     required String senderId,
@@ -20,12 +21,14 @@ class InvitationRemoteDataSource {
     });
   }
 
+//--------------------------------------GET PENDING INVITATIONS-------------------------------------------
   Future<List<InvitationModel>> getPendingInvitations(String userId, {String? token}) async {
     final response = await apiClient.getList('/invitations/pending/$userId', token: token);
 
     return response.map((e) => InvitationModel.fromJson(e)).toList();
   }
 
+//--------------------------------------ACCEPT INVITATION-------------------------------------------
   Future<void> acceptInvitation({
     required String invitationId,
     required String userId,
@@ -34,6 +37,7 @@ class InvitationRemoteDataSource {
     await apiClient.post(endpoint, {});
   }
 
+//--------------------------------------REGFUSE INVITATION-------------------------------------------
   Future<void> refuseInvitation({
     required String invitationId,
     required String userId,

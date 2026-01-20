@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:sportify_frontend/core/constants/api_constants.dart';
 import 'package:sportify_frontend/core/theme/app_colors.dart';
 
 class PlayerTile extends StatelessWidget {
   final String name;
+  final String? avatarUrl;
   final String role;
   final bool isCreator;
   final bool isYou;
@@ -10,6 +12,7 @@ class PlayerTile extends StatelessWidget {
   const PlayerTile({
     super.key,
     required this.name,
+    this.avatarUrl,
     required this.role,
     this.isCreator = false,
     this.isYou = false,
@@ -33,9 +36,15 @@ class PlayerTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const CircleAvatar(
+          CircleAvatar(
             radius: 22,
-            backgroundColor: Colors.grey,
+            backgroundColor: Colors.grey.shade300,
+            backgroundImage: avatarUrl != null && avatarUrl!.isNotEmpty
+                ? NetworkImage("${ApiConstants.imageUrl}${avatarUrl!}")
+                : null,
+            child: avatarUrl == null || avatarUrl!.isEmpty
+                ? Icon(Icons.person, size: 24, color: Colors.grey.shade600)
+                : null,
           ),
           const SizedBox(width: 12),
 
@@ -127,4 +136,3 @@ class _Tag extends StatelessWidget {
     );
   }
 }
-

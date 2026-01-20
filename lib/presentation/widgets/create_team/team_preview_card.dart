@@ -1,40 +1,64 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 
 class TeamPreviewCard extends StatelessWidget {
   final String teamName;
-  final String colorHex;
+  final Color teamColor;
+  final File? teamLogo;
 
   const TeamPreviewCard({
     super.key,
     required this.teamName,
-    required this.colorHex,
+    this.teamColor = const Color(0xFF22C55E),
+    this.teamLogo,
   });
-
-  Color get color =>
-      Color(int.parse(colorHex.replaceFirst('#', '0xff')));
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         color: Colors.white,
         boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 8),
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
         ],
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            backgroundColor: color,
-            child: const Icon(Icons.group, color: Colors.white),
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: teamColor,
+              borderRadius: BorderRadius.circular(8),
+              image: teamLogo != null
+                  ? DecorationImage(
+                      image: FileImage(teamLogo!),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
+            ),
+            child: teamLogo == null
+                ? const Icon(
+                    Icons.group,
+                    color: Colors.white,
+                    size: 24,
+                  )
+                : null,
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               teamName,
-              style: const TextStyle(fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 15,
+              ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
